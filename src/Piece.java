@@ -4,7 +4,8 @@ import java.util.List;
 public class Piece implements Comparable<Piece>{
 	public byte value;
 	public short id;
-
+	
+	
 	public Piece(byte value,short id) {
 		this.value = value;
 		this.id = id;

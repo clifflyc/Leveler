@@ -4,11 +4,11 @@ import java.util.Queue;
 import javafx.concurrent.Task;
 
 public class Tracer extends Task<Void> {
-	static Queue<BoardState> playbackQueue = new LinkedList<BoardState>();
+	static Queue<Board> playbackQueue = new LinkedList<Board>();
 
-	BoardState finalState;
+	Board finalState;
 
-	public Tracer(BoardState finalState) {
+	public Tracer(Board finalState) {
 		this.finalState = finalState;
 	}
 
@@ -19,7 +19,7 @@ public class Tracer extends Task<Void> {
 		return null;
 	}
 
-	void retrace(BoardState b) {
+	void retrace(Board b) {
 		if (b.previousState != null) {
 			retrace(b.previousState);
 		}

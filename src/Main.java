@@ -26,8 +26,8 @@ public class Main extends Application {
 	Label chat;
 	ImageView imageView;
 
-	BoardState board;
-	BoardState oriBoard;
+	Board board;
+	Board oriBoard;
 
 	int size = 4;
 	int boxSize = 200;
@@ -95,7 +95,7 @@ public class Main extends Application {
 	void stuff() {
 		grid = new GridPane();
 		labelsGrid = new Label[size][size];
-		board = new BoardState(size);
+		board = new Board(size);
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
@@ -288,21 +288,21 @@ public class Main extends Application {
 		}
 	}
 
-	void printBoard(BoardState boardState) {
-		printBoard(boardState, false);
+	void printBoard(Board Board) {
+		printBoard(Board, false);
 	}
 
-	void printBoard(BoardState boardState, boolean flash) {
-		int[][] gameGrid = boardState.getBoardRef();
+	void printBoard(Board Board, boolean flash) {
+		int[][] gameGrid = Board.getBoardRef();
 		for (int i = 0; i < gameGrid.length; i++) {
 			for (int j = 0; j < gameGrid[0].length; j++) {
 
 				setLabelText(labelsGrid[i][j], gameGrid[i][j]);
 
-				if (flash || board.grid[i][j] != boardState.grid[i][j]) {
+				if (flash || board.grid[i][j] != Board.grid[i][j]) {
 
 					Color start = getColor(board.grid[i][j]);
-					Color end = getColor(boardState.grid[i][j]);
+					Color end = getColor(Board.grid[i][j]);
 
 					if (flash) {
 						start = start.darker();
@@ -313,7 +313,7 @@ public class Main extends Application {
 				}
 			}
 		}
-		board = boardState;
+		board = Board;
 	}
 
 	void setLabelText(Label label, int number) {
@@ -398,7 +398,7 @@ public class Main extends Application {
 	}
 
 	void initNewGame() {
-		oriBoard = BoardState.generateRandomBoard(size);
+		oriBoard = Board.generateRandomBoard(size);
 		restoreOriginalBoard();
 	}
 
@@ -409,19 +409,19 @@ public class Main extends Application {
 	void changeGrid(int row, int column, int change) {
 
 		if (edit) {
-			BoardState clone = board.getDeepClone();
+			Board clone = board.getDeepClone();
 			clone.grid[row][column] += change;
 			printBoard(clone);
 			oriBoard = clone;
 		} else {
-			BoardState branch = board.getNewBranch();
+			Board branch = board.getNewBranch();
 			branch.changeGrid(row, column, change);
 			printBoard(branch);
 		}
 	}
 
 	void algorithm2() {
-		Algorithm2 algorithm = new Algorithm2(oriBoard);
+		Algorithm2 algorithm = new Algorithm2(oriBoard.grid);
 		algorithm.messageProperty().addListener((o, oldmessage, newMessage) -> handleMessageSmart2(newMessage));
 		new Thread(algorithm).start();
 	}
@@ -437,7 +437,7 @@ public class Main extends Application {
 	}
 
 	void algorithm() {
-		Algorithm algorithm = new Algorithm(oriBoard);
+		Algorithm algorithm = new Algorithm(oriBoard.grid);
 		algorithm.messageProperty().addListener((o, oldMessage, newMessage) -> handleMessageSmart(newMessage));
 		new Thread(algorithm).start();
 	}
@@ -461,18 +461,18 @@ public class Main extends Application {
 		
 	}
 	void playbackSmart2() {
-		//BoardState solvedBoard = Algorithm2.solution;
+		//Board solvedBoard = Algorithm2.solution;
 		//Tracer tracer = new Tracer(solvedBoard);
 		//tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
 		//new Thread(tracer).start();
 		//say("Playing smart2 solution...");
 	}
 	void playbackSmart() {
-		BoardState solvedBoard = Algorithm.solution;
-		Tracer tracer = new Tracer(solvedBoard);
-		tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
-		new Thread(tracer).start();
-		say("Playing smart solution...");
+		//Board solvedBoard = Algorithm.solution;
+		//Tracer tracer = new Tracer(solvedBoard);
+		//tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
+		//new Thread(tracer).start();
+		//say("Playing smart solution...");
 	}
 
 	void bruteForce() {
@@ -492,7 +492,7 @@ public class Main extends Application {
 	}
 
 	void playback() {
-		BoardState solvedBoard = BruteForce.solutions.poll();
+		Board solvedBoard = BruteForce.solutions.poll();
 		Tracer tracer = new Tracer(solvedBoard);
 		tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
 		new Thread(tracer).start();
@@ -500,7 +500,7 @@ public class Main extends Application {
 	}
 
 	void printTracerGrid() {
-		BoardState b = Tracer.playbackQueue.poll();
+		Board b = Tracer.playbackQueue.poll();
 		printBoard(b, b.moves == 0 ? true : false);
 
 		if (autoplay && b.pieces == 1) {

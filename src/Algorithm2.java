@@ -9,15 +9,16 @@ public class Algorithm2 extends Task<Void> {
 
 	BoardState2 board;
 
-	public Algorithm2(BoardState board) {
+	public Algorithm2(int[][] grid) {
+		byte size = (byte) grid.length;
 		this.board = new BoardState2();
-		byte[][] byteGrid = new byte[board.size][board.size];
-		for (int i =0;i<board.size;i++) {
-			for (int j=0;j<board.size;j++) {
-				byteGrid[i][j] = (byte) board.grid[i][j];
+		byte[][] byteGrid = new byte[size][size];
+		for (int i =0;i<size;i++) {
+			for (int j=0;j<size;j++) {
+				byteGrid[i][j] = (byte) grid[i][j];
 			}
 		}
-		this.board.setup((byte)board.size, byteGrid);
+		this.board.setup((byte)size, byteGrid);
 	}
 
 	@Override
@@ -111,7 +112,6 @@ public class Algorithm2 extends Task<Void> {
 						}
 					}
 				}
-
 			}
 		}
 
