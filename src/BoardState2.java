@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class BoardState2 implements Comparable<BoardState2> {
-	static HashMap<Integer, Pair> idToCoord;
+	static HashMap<Short, Pair> idToCoord;
 
-	int moves;
+	short moves;
 	public List<Piece> pieces = new ArrayList<Piece>();
 	public List<Pair> links;
 
@@ -20,19 +20,19 @@ public class BoardState2 implements Comparable<BoardState2> {
 
 	// --
 
-	public void setup(int size, int[][] grid) {
+	public void setup(byte size, byte[][] grid) {
 		makePieces(size, grid);
 		assignNeighbours(size, grid);
 		
 	}
 
-	private void makePieces(int size, int[][] grid) {
-		idToCoord = new HashMap<Integer, Pair>();
+	private void makePieces(byte size, byte[][] grid) {
+		idToCoord = new HashMap<Short, Pair>();
 		List<Piece> pieces = new ArrayList<Piece>();
 		boolean[][] counted = new boolean[size][size];
-		int id = 0;
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
+		short id = 0;
+		for (byte i = 0; i < size; i++) {
+			for (byte j = 0; j < size; j++) {
 				if (!counted[i][j]) {
 					id++;
 					pieces.add(new Piece(grid[i][j], id));
@@ -44,30 +44,30 @@ public class BoardState2 implements Comparable<BoardState2> {
 		this.pieces = pieces;
 	}
 
-	private void countPiece(int row, int column, int pieceValue, boolean[][] counted, int size, int[][] grid) {
+	private void countPiece(byte row, byte column, byte pieceValue, boolean[][] counted, byte size, byte [][] grid) {
 		if (row >= 0 && column >= 0 && row < size && column < size) {
 			if (!counted[row][column] && grid[row][column] == pieceValue) {
 				counted[row][column] = true;
-				countPiece(row + 1, column, pieceValue, counted, size, grid);
-				countPiece(row - 1, column, pieceValue, counted, size, grid);
-				countPiece(row, column + 1, pieceValue, counted, size, grid);
-				countPiece(row, column - 1, pieceValue, counted, size, grid);
+				countPiece((byte)(row + 1), column, pieceValue, counted, size, grid);
+				countPiece((byte)(row - 1), column, pieceValue, counted, size, grid);
+				countPiece(row, (byte)(column + 1), pieceValue, counted, size, grid);
+				countPiece(row, (byte)(column - 1), pieceValue, counted, size, grid);
 			}
 		}
 	}
 
 	// --
 
-	private void assignNeighbours(int size, int[][] grid) {
+	private void assignNeighbours(byte size, byte[][] grid) {
 		for (Piece piece : pieces) {
-			List<Integer> neighbourIDs = new ArrayList<Integer>();
+			List<Short> neighbourIDs = new ArrayList<Short>();
 			boolean[][] counted = new boolean[size][size];
 			Pair coord = idToCoord.get(piece.id);
-			int row = coord.i1;
-			int column = coord.i2;
+			byte row = (byte)coord.i1;
+			byte column = (byte)coord.i2;
 			traverseToNeighbours(row, column, grid[row][column], counted, size, grid, neighbourIDs);
 
-			for (int neighbourId : neighbourIDs) {
+			for (short neighbourId : neighbourIDs) {
 				Pair link = new Pair(piece.id, neighbourId);
 				if (!links.contains(link)) {
 					links.add(link);
@@ -76,16 +76,16 @@ public class BoardState2 implements Comparable<BoardState2> {
 		}
 	}
 
-	private void traverseToNeighbours(int row, int column, int pieceValue, boolean[][] counted, int size, int[][] grid,
-			List<Integer> neighbourIDs) {
+	private void traverseToNeighbours(byte row, byte column, byte pieceValue, boolean[][] counted, byte size, byte[][] grid,
+			List<Short> neighbourIDs) {
 		if (row >= 0 && column >= 0 && row < size && column < size) {
 			if (!counted[row][column]) {
 				if (grid[row][column] == pieceValue) {
 					counted[row][column] = true;
-					traverseToNeighbours(row + 1, column, pieceValue, counted, size, grid, neighbourIDs);
-					traverseToNeighbours(row - 1, column, pieceValue, counted, size, grid, neighbourIDs);
-					traverseToNeighbours(row, column + 1, pieceValue, counted, size, grid, neighbourIDs);
-					traverseToNeighbours(row, column - 1, pieceValue, counted, size, grid, neighbourIDs);
+					traverseToNeighbours((byte) (row + 1), column, pieceValue, counted, size, grid, neighbourIDs);
+					traverseToNeighbours((byte) (row - 1), column, pieceValue, counted, size, grid, neighbourIDs);
+					traverseToNeighbours(row, (byte) (column + 1), pieceValue, counted, size, grid, neighbourIDs);
+					traverseToNeighbours(row, (byte) (column - 1), pieceValue, counted, size, grid, neighbourIDs);
 				} else {
 					traverseToPiece(row, column, grid[row][column], counted, size, grid, neighbourIDs);
 				}
@@ -93,8 +93,8 @@ public class BoardState2 implements Comparable<BoardState2> {
 		}
 	}
 
-	private void traverseToPiece(int row, int column, int pieceValue, boolean[][] counted, int size, int[][] grid,
-			List<Integer> neighbourIDs) {
+	private void traverseToPiece(byte row, byte column, byte pieceValue, boolean[][] counted, byte size, byte[][] grid,
+			List<Short> neighbourIDs) {
 		if (row >= 0 && column >= 0 && row < size && column < size) {
 			if (!counted[row][column]) {
 				if (grid[row][column] == pieceValue) {
@@ -109,10 +109,10 @@ public class BoardState2 implements Comparable<BoardState2> {
 						}
 					}
 
-					traverseToPiece(row + 1, column, pieceValue, counted, size, grid, neighbourIDs);
-					traverseToPiece(row - 1, column, pieceValue, counted, size, grid, neighbourIDs);
-					traverseToPiece(row, column + 1, pieceValue, counted, size, grid, neighbourIDs);
-					traverseToPiece(row, column - 1, pieceValue, counted, size, grid, neighbourIDs);
+					traverseToPiece((byte) (row + 1), column, pieceValue, counted, size, grid, neighbourIDs);
+					traverseToPiece((byte) (row - 1), column, pieceValue, counted, size, grid, neighbourIDs);
+					traverseToPiece(row, (byte) (column + 1), pieceValue, counted, size, grid, neighbourIDs);
+					traverseToPiece(row, (byte) (column - 1), pieceValue, counted, size, grid, neighbourIDs);
 				}
 			}
 		}
@@ -120,10 +120,10 @@ public class BoardState2 implements Comparable<BoardState2> {
 
 	public Pair getNextHighLow(Piece piece){
 
-		int nextHighest = Integer.MAX_VALUE;
-		int nextLowest = Integer.MIN_VALUE;
+		byte nextHighest = Byte.MAX_VALUE;
+		byte nextLowest = Byte.MIN_VALUE;
 		for (Piece neighbour : getNeighbours(piece)) {
-			int neighbourValue = neighbour.value;
+			byte neighbourValue = neighbour.value;
 			if (neighbourValue > piece.value && neighbourValue < nextHighest) {
 				nextHighest = neighbourValue;
 			}
@@ -131,31 +131,9 @@ public class BoardState2 implements Comparable<BoardState2> {
 				nextLowest = neighbourValue;
 			}
 		}
-	return new Pair(nextHighest,nextLowest);
+		return new Pair(nextHighest,nextLowest);
 	}
-	public int getNextHighestNeighbour(Piece piece) {
-		int nextHighest = Integer.MAX_VALUE;
-		for (Piece neighbour : getNeighbours(piece)) {
-			int neighbourValue = neighbour.value;
-			if (neighbourValue > piece.value && neighbourValue < nextHighest) {
-				nextHighest = neighbourValue;
-			}
-		}
-
-		return nextHighest;
-	}
-
-	public int getNextLowestNeighbour(Piece piece) {
-		int nextLowest = Integer.MIN_VALUE;
-		for (Piece neighbour : getNeighbours(piece)) {
-			int neighbourValue = neighbour.value;
-			if (neighbourValue < piece.value && neighbourValue > nextLowest) {
-				nextLowest = neighbourValue;
-			}
-		}
-		return nextLowest;
-	}
-
+	
 	private List<Piece> getNeighbours(Piece piece) {
 		List<Piece> neighbours = new ArrayList<Piece>();
 
@@ -181,7 +159,7 @@ public class BoardState2 implements Comparable<BoardState2> {
 		return null;
 	}
 
-	public void changeGrid(int pieceId, int change) {
+	public void changeGrid(short pieceId, int change) {
 		Piece piece=null;
 		for (Piece p : pieces) {
 			if (p.id == pieceId) {

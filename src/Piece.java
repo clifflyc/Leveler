@@ -2,9 +2,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Piece implements Comparable<Piece>{
-	public int value, id;
+	public byte value;
+	public short id;
 
-	public Piece(int value,int id) {
+	public Piece(byte value,short id) {
 		this.value = value;
 		this.id = id;
 	}

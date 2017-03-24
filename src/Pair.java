@@ -1,9 +1,9 @@
 public final class Pair {
 
-	public final int i1;
-	public final int i2;
+	public final short i1;
+	public final short i2;
 
-	public Pair(int i1, int i2) {
+	public Pair(short i1, short i2) {
 		this.i1 = i1;
 		this.i2 = i2;
 	}
@@ -20,7 +20,6 @@ public final class Pair {
 				return true;
 			}
 		}
-
 		return false;
 	}
 

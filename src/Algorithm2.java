@@ -11,7 +11,13 @@ public class Algorithm2 extends Task<Void> {
 
 	public Algorithm2(BoardState board) {
 		this.board = new BoardState2();
-		this.board.setup(board.size, board.grid);
+		byte[][] byteGrid = new byte[board.size][board.size];
+		for (int i =0;i<board.size;i++) {
+			for (int j=0;j<board.size;j++) {
+				byteGrid[i][j] = (byte) board.grid[i][j];
+			}
+		}
+		this.board.setup((byte)board.size, byteGrid);
 	}
 
 	@Override
@@ -64,7 +70,7 @@ public class Algorithm2 extends Task<Void> {
 			if (currentState.pieceCount() == 1) {// solved!
 				if (currentState.moves < leastMoves) {
 					leastMoves = currentState.moves;
-					solution = currentState;
+					solution = currentState;	
 				}
 			} else if (currentState.moves+currentState.getLeastPossibleMovesLeft() < leastMoves) {
 
@@ -111,19 +117,19 @@ public class Algorithm2 extends Task<Void> {
 
 		return ops;
 	}
-
+	//4343
+	//2132
+	//3423
+	//1342
 	void branchOff(BoardState2 currentState, PriorityQueue<BoardState2> queue) {
 		for (Piece piece : currentState.pieces) {
-			// int nextHighest = currentState.getNextHighestNeighbour(piece);
-			// int nextLowest = currentState.getNextLowestNeighbour(piece);
-
 			Pair nextHighLow = currentState.getNextHighLow(piece);
-			if (nextHighLow.i1 != Integer.MAX_VALUE) {
+			if (nextHighLow.i1 != Byte.MAX_VALUE) {
 				BoardState2 branch = currentState.getNewBranch();
 				branch.changeGrid(piece.id, nextHighLow.i1 - piece.value);
 				queue.add(branch);
 			}
-			if (nextHighLow.i2 != Integer.MIN_VALUE) {
+			if (nextHighLow.i2 != Byte.MIN_VALUE) {
 				BoardState2 branch = currentState.getNewBranch();
 				branch.changeGrid(piece.id, nextHighLow.i2 - piece.value);
 				queue.add(branch);

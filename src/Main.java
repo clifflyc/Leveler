@@ -36,9 +36,6 @@ public class Main extends Application {
 	boolean autoplay = false;
 	boolean checking = false;
 	boolean edit = false;
-
-	
-	BoardState2 bs;
 	
 	public static void main(String[] args) {
 		System.out.println("launching!");
@@ -402,8 +399,6 @@ public class Main extends Application {
 
 	void initNewGame() {
 		oriBoard = BoardState.generateRandomBoard(size);
-		bs = new BoardState2();
-		bs.setup(size,oriBoard.grid);
 		restoreOriginalBoard();
 	}
 
