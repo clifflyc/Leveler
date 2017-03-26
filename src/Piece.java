@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Piece implements Comparable<Piece>{
 	public byte value;
 	public short id;

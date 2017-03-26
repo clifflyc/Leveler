@@ -1,9 +1,11 @@
 import javafx.animation.Animation;
 import javafx.application.*;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.event.*;
 import javafx.scene.control.*;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
@@ -13,30 +15,40 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-//
+//TODO
+//playback
+//reUI
+//help commands
+//no concurrent solves
+//bigger sizes edges
+
 public class Main extends Application {
-	final int SCREENWIDTH = 800;
+	static final int SCREEN_WIDTH = 800;
+	static final int COMMAND_LINE_HEIGHT = 50;
 
 	Stage stage;
 	Group root;
 
 	Label[][] labelsGrid;
 	GridPane grid;
+
+	Label status;
+	Label log;
 	TextField textField;
-	Label chat;
 	ImageView imageView;
+	ScrollPane logPane;
 
 	Board board;
 	Board oriBoard;
 
+	String logText;
 	int size = 4;
 	int boxSize = 200;
 	static int speed = 350;
 
-	boolean autoplay = false;
 	boolean checking = false;
 	boolean edit = false;
-	
+
 	public static void main(String[] args) {
 		System.out.println("launching!");
 		launch(args);
@@ -45,8 +57,10 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage stage) {
+		logText = "";
 		this.stage = stage;
 		stage.setTitle("Leveler!");
+		
 		setup();
 		stage.show();
 	}
@@ -55,24 +69,39 @@ public class Main extends Application {
 		calculateBoxSize();
 		initStuff();
 		stuff();
+		initNewGame();
 		addToRoot();
-		stage.setScene(new Scene(root, size * boxSize, size * boxSize + 100));
+		stage.setScene(new Scene(root, SCREEN_WIDTH * 1.5, SCREEN_WIDTH));
 
 	}
 
 	void calculateBoxSize() {
-		boxSize = SCREENWIDTH / size;
+		boxSize = SCREEN_WIDTH / size;
 
 	}
 
 	void initStuff() {
-		chat = new Label();
-		chat.setPrefSize(size * boxSize, 60);
-		chat.setLayoutY(size * boxSize);
+		status = new Label();
+		status.setPrefSize(SCREEN_WIDTH / 2, COMMAND_LINE_HEIGHT);
+		status.setLayoutX(SCREEN_WIDTH);
 
+		log = new Label();
+		log.setBackground(Background.EMPTY);
+		log.setAlignment(Pos.TOP_LEFT);
+		log.maxHeight(Double.POSITIVE_INFINITY);
+		log.setText(logText);
+		logPane = new ScrollPane();
+		logPane.setPrefSize(SCREEN_WIDTH / 2, SCREEN_WIDTH - 2 * COMMAND_LINE_HEIGHT);
+		logPane.setContent(log);
+		logPane.setLayoutX(SCREEN_WIDTH);
+		logPane.setLayoutY(COMMAND_LINE_HEIGHT);
+		logPane.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
+		logPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+		
 		textField = new TextField();
-		textField.setPrefSize(size * boxSize, 40);
-		textField.setLayoutY(size * boxSize + 60);
+		textField.setPrefSize(SCREEN_WIDTH / 2, COMMAND_LINE_HEIGHT);
+		textField.setLayoutX(SCREEN_WIDTH);
+		textField.setLayoutY(SCREEN_WIDTH - COMMAND_LINE_HEIGHT);
 		textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
 			@Override
@@ -123,16 +152,16 @@ public class Main extends Application {
 				grid.add(labelsGrid[i][j], j, i);
 			}
 		}
-
-		initNewGame();
 	}
 
 	void addToRoot() {
 		root = new Group();
 		root.getChildren().add(grid);
-		root.getChildren().add(imageView);
+		root.getChildren().add(logPane);
 		root.getChildren().add(textField);
-		root.getChildren().add(chat);
+		root.getChildren().add(status);
+		root.getChildren().add(imageView);
+
 	}
 
 	void command(String command) {
@@ -148,26 +177,26 @@ public class Main extends Application {
 			switch (split[1]) {
 			case "game":
 				initNewGame();
-				say("Started new game.");
+				addLog("Started new game.");
 				break;
 			default:
-				say("New what?");
+				addLog("New what?");
 				break;
 			}
 			break;
 
 		case "reset":
 			restoreOriginalBoard();
-			say("Reset back to original board.");
+			addLog("Reset back to original board.");
 			break;
 
 		case "size":
 			try {
 				size = Integer.parseInt(split[1]);
 				setup();
-				say("Set board size to " + size + "!");
+				addLog("Set board size to " + size + "!");
 			} catch (NumberFormatException e) {
-				say("I don't understand what is '" + split[1] + "'.\nIs it a number?");
+				addLog("I don't understand what is '" + split[1] + "'.\nIs it a number?");
 			}
 
 			break;
@@ -175,14 +204,11 @@ public class Main extends Application {
 		case "speed":
 			try {
 				speed = Integer.parseInt(split[1]);
-				say("Set animation speed to " + speed + "!");
+				addLog("Set animation speed to " + speed + "!");
 			} catch (NumberFormatException e) {
-				say("I don't understand what is '" + split[1] + "'.\nIs it a number?");
+				addLog("I don't understand what is '" + split[1] + "'.\nIs it a number?");
 			}
 
-			break;
-		case "state":
-			say("There is/are currently " + board.pieces + " piece(s) after " + board.getMoves() + " move(s).");
 			break;
 		case "check":
 			switch (split[1]) {
@@ -193,73 +219,41 @@ public class Main extends Application {
 				check();
 				break;
 			default:
-				say("Check what?");
+				addLog("Check what?");
 				break;
 			}
 			break;
 		case "smart":
 			switch (split[1]) {
 			case "":
-				say("< =_= > working...!");
+				setStatus("< =_= > working...!");
 				algorithm();
 				break;
 			case "playback":
 				playbackSmart();
 				break;
-
+			case "stop":
+				Algorithm.stop();
+				break;
 			default:
-				say("Smart what?");
+				addLog("Smart what?");
 				break;
 			}
 			break;
 		case "smart2":
 			switch (split[1]) {
 			case "":
-				say("< =_= > working...!");
+				setStatus("< =_= > working...!");
 				algorithm2();
 				break;
 			case "playback":
 				playbackSmart2();
 				break;
+			case "stop":
+				Algorithm2.stop();
+				break;
 			default:
-				say("Smart2 what?");
-				break;
-			}
-			break;
-		case "brute":
-			switch (split[1]) {
-			case "":
-				say("< =_= > working...!");
-				bruteForce();
-				break;
-			case "solutions":
-				say("" + BruteForce.solutions.size());
-				break;
-			case "playback":
-				playback();
-				break;
-			case "autoplay":
-				switch (split[2]) {
-				case "":
-					autoplay = true;
-					bruteForce();
-					break;
-				case "on":
-					autoplay = true;
-					say("Autoplay turned on.");
-					break;
-				case "off":
-					autoplay = false;
-					say("Autoplay turned off.");
-					break;
-				default:
-					say("Autoplay what?");
-					break;
-				}
-				break;
-
-			default:
-				say("Brute what?");
+				addLog("Smart2 what?");
 				break;
 			}
 			break;
@@ -276,14 +270,16 @@ public class Main extends Application {
 
 		case "undo":
 			printBoard(board.previousState);
+			setCurrentBoard(board.previousState);
 			break;
-		case "pun":
-			say("Violinists often fiddle around.");
+		case "read":
+			importBoard();
 			break;
-		case "up":
+		case "write":
+			exportBoard();
 			break;
 		default:
-			say("I don't know what you are saying.");
+			addLog("I don't know what you are saying.");
 			break;
 		}
 	}
@@ -293,7 +289,7 @@ public class Main extends Application {
 	}
 
 	void printBoard(Board Board, boolean flash) {
-		int[][] gameGrid = Board.getBoardRef();
+		int[][] gameGrid = Board.grid;
 		for (int i = 0; i < gameGrid.length; i++) {
 			for (int j = 0; j < gameGrid[0].length; j++) {
 
@@ -313,7 +309,6 @@ public class Main extends Application {
 				}
 			}
 		}
-		board = Board;
 	}
 
 	void setLabelText(Label label, int number) {
@@ -393,8 +388,13 @@ public class Main extends Application {
 		return color;
 	}
 
-	void say(String text) {
-		chat.setText(text);
+	void setStatus(String text) {
+		status.setText(text);
+	}
+
+	void addLog(String text) {
+		logText += "\n" + text;
+		log.setText(logText);
 	}
 
 	void initNewGame() {
@@ -402,8 +402,34 @@ public class Main extends Application {
 		restoreOriginalBoard();
 	}
 
+	void importBoard() {
+		int[][] grid = FileIO.read();
+		if (grid != null) {
+			size = grid.length;
+			setup();
+			oriBoard = new Board(grid.length);
+			oriBoard.grid = grid;
+			restoreOriginalBoard();
+			addLog("Successfully read from file!");
+		} else {
+			addLog("Error reading from file!");
+		}
+	}
+
+	void exportBoard() {
+		FileIO.write(board.grid);
+		addLog("Successfully wrote to file!");
+
+	}
+
+	void setCurrentBoard(Board board) {
+		this.board = board;
+	}
+
 	void restoreOriginalBoard() {
-		printBoard(oriBoard.getDeepClone(), true);
+		Board oriClone = oriBoard.getDeepClone();
+		printBoard(oriClone, true);
+		setCurrentBoard(oriClone);
 	}
 
 	void changeGrid(int row, int column, int change) {
@@ -411,8 +437,8 @@ public class Main extends Application {
 		if (edit) {
 			Board clone = board.getDeepClone();
 			clone.grid[row][column] += change;
-			printBoard(clone);
 			oriBoard = clone;
+			restoreOriginalBoard();
 		} else {
 			Board branch = board.getNewBranch();
 			branch.changeGrid(row, column, change);
@@ -427,7 +453,7 @@ public class Main extends Application {
 	}
 
 	void handleMessageSmart2(String message) {
-		say(message);
+		setStatus(message);
 		String[] words = message.split(" ");
 		if (words[0].equals("Done!")) {
 			if (checking) {
@@ -443,74 +469,40 @@ public class Main extends Application {
 	}
 
 	void handleMessageSmart(String message) {
-		say(message);
+		setStatus(message);
 		String[] words = message.split(" ");
-		
+
 		if (words[0].equals("Done!")) {
 			if (checking) {
 				if (Algorithm.solution.moves != Algorithm2.solution.moves) {
 					checking = false;
-					say("Solution mismatch! Your algorithm sucks!");
+					setStatus("Solution mismatch! Your algorithm sucks!");
 				} else {
 					initNewGame();
 					algorithm2();
 				}
-				 
+
 			}
 		}
-		
+
 	}
+
 	void playbackSmart2() {
-		//Board solvedBoard = Algorithm2.solution;
-		//Tracer tracer = new Tracer(solvedBoard);
-		//tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
-		//new Thread(tracer).start();
-		//say("Playing smart2 solution...");
+		// Board solvedBoard = Algorithm2.solution;
+		// Tracer tracer = new Tracer(solvedBoard);
+		// tracer.messageProperty().addListener((o, oldMessage, newMessage) ->
+		// printTracerGrid());
+		// new Thread(tracer).start();
+		// say("Playing smart2 solution...");
 	}
+
 	void playbackSmart() {
-		//Board solvedBoard = Algorithm.solution;
-		//Tracer tracer = new Tracer(solvedBoard);
-		//tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
-		//new Thread(tracer).start();
-		//say("Playing smart solution...");
-	}
-
-	void bruteForce() {
-		BruteForce bForce = new BruteForce(oriBoard);
-		bForce.messageProperty().addListener((o, oldMessage, newMessage) -> handleMessage(newMessage));
-		new Thread(bForce).start();
-	}
-
-	void handleMessage(String message) {
-		say(message);
-		String[] words = message.split(" ");
-		if (words[0].equals("Done!")) {
-			if (autoplay) {
-				playback();
-			}
-		}
-	}
-
-	void playback() {
-		Board solvedBoard = BruteForce.solutions.poll();
-		Tracer tracer = new Tracer(solvedBoard);
-		tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
-		new Thread(tracer).start();
-		say("Playing solutions... (" + BruteForce.solutions.size() + " more remaining)");
-	}
-
-	void printTracerGrid() {
-		Board b = Tracer.playbackQueue.poll();
-		printBoard(b, b.moves == 0 ? true : false);
-
-		if (autoplay && b.pieces == 1) {
-			if (BruteForce.solutions.size() > 0) {
-				playback();
-			} else {
-				//initNewGame();
-				//bruteForce();
-			}
-		}
+		// Board solvedBoard = Algorithm.solution;
+		// Tracer tracer = new Tracer(solvedBoard);
+		// tracer.messageProperty().addListener((o, oldMessage, newMessage) ->
+		// printTracerGrid());
+		// new Thread(tracer).start();
+		// say("Playing smart solution...");
 	}
 
 	void check() {

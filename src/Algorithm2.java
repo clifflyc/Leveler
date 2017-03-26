@@ -1,28 +1,31 @@
-import java.util.Arrays;
-import java.util.List;
 import java.util.PriorityQueue;
 
 import javafx.concurrent.Task;
 
 public class Algorithm2 extends Task<Void> {
 	static BoardState2 solution;
-
+	static boolean stop;
 	BoardState2 board;
 
 	public Algorithm2(int[][] grid) {
 		byte size = (byte) grid.length;
 		this.board = new BoardState2();
 		byte[][] byteGrid = new byte[size][size];
-		for (int i =0;i<size;i++) {
-			for (int j=0;j<size;j++) {
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
 				byteGrid[i][j] = (byte) grid[i][j];
 			}
 		}
-		this.board.setup((byte)size, byteGrid);
+		this.board.setup((byte) size, byteGrid);
+	}
+
+	public static void stop() {
+		stop = true;
 	}
 
 	@Override
 	protected Void call() throws Exception {
+		stop = false;
 		int ops = 0;
 		solution = board;
 
@@ -30,7 +33,7 @@ public class Algorithm2 extends Task<Void> {
 			ops++;
 
 			Piece[] orderedPieces = solution.pieces;
-			
+
 			if (orderedPieces[0].value != orderedPieces[1].value) {
 
 				solution = solution.getNewBranch();
@@ -46,8 +49,11 @@ public class Algorithm2 extends Task<Void> {
 			}
 		}
 
-		updateMessage("Done! Found least moves is " + solution.moves + "!!!\n" + "(after " + ops + " ops)");
-
+		if (stop) {
+			updateMessage("Stopped.");
+		} else {
+			updateMessage("Done! Found least moves is " + solution.moves + "!!!\n" + "(after " + ops + " ops)");
+		}
 		return null;
 	}
 
@@ -59,7 +65,8 @@ public class Algorithm2 extends Task<Void> {
 
 		branchOff(solution, queue);
 
-		while (!queue.isEmpty()) {
+		// how to name 'a'?
+		a: while (!queue.isEmpty()) {
 			current++;
 			ops++;
 
@@ -71,9 +78,9 @@ public class Algorithm2 extends Task<Void> {
 			if (currentState.pieceCount() == 1) {// solved!
 				if (currentState.moves < leastMoves) {
 					leastMoves = currentState.moves;
-					solution = currentState;	
+					solution = currentState;
 				}
-			} else if (currentState.moves+currentState.getLeastPossibleMovesLeft() < leastMoves) {
+			} else if (currentState.moves + currentState.getLeastPossibleMovesLeft() < leastMoves) {
 
 				PriorityQueue<BoardState2> queue2 = new PriorityQueue<BoardState2>();
 				queue2.add(currentState);
@@ -82,6 +89,9 @@ public class Algorithm2 extends Task<Void> {
 					ops++;
 
 					if (ops % 10000 == 0) {
+						if (stop) {
+							break a;
+						}
 						updateMessage("< =_= > working...! (" + ops + " ops at part " + current + "/"
 								+ (current + queue.size()) + ")\n Is least moves " + leastMoves + "??");
 					}
@@ -93,7 +103,7 @@ public class Algorithm2 extends Task<Void> {
 							leastMoves = currentState2.moves;
 							solution = currentState2;
 						}
-					} else if (currentState2.moves < leastMoves) {
+					} else if (currentState2.moves + currentState2.getLeastPossibleMovesLeft() < leastMoves) {
 						Piece[] orderedPieces = currentState2.pieces;
 
 						if (orderedPieces[0].value != orderedPieces[1].value) {
@@ -106,7 +116,7 @@ public class Algorithm2 extends Task<Void> {
 							BoardState2 branch = currentState2.getNewBranch();
 							branch.changeGrid(orderedPieces[orderedPieces.length - 1].id, -1);
 							queue2.add(branch);
-						} else {
+						} else if (currentState2.moves + currentState2.getLeastPossibleMovesLeft() + 1 < leastMoves) {
 
 							branchOff(currentState2, queue2);
 						}
@@ -117,10 +127,11 @@ public class Algorithm2 extends Task<Void> {
 
 		return ops;
 	}
-	//4343
-	//2132
-	//3423
-	//1342
+
+	// 4343
+	// 2132
+	// 3423
+	// 1342
 	void branchOff(BoardState2 currentState, PriorityQueue<BoardState2> queue) {
 		for (Piece piece : currentState.pieces) {
 			Pair nextHighLow = currentState.getNextHighLow(piece);
