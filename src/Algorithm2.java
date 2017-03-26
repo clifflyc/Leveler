@@ -29,7 +29,7 @@ public class Algorithm2 extends Task<Void> {
 		while (solution.pieceCount() != 1) {
 			ops++;
 
-			Piece[] orderedPieces = solution.getOrderedPieces();
+			Piece[] orderedPieces = solution.pieces;
 			
 			if (orderedPieces[0].value != orderedPieces[1].value) {
 
@@ -94,7 +94,7 @@ public class Algorithm2 extends Task<Void> {
 							solution = currentState2;
 						}
 					} else if (currentState2.moves < leastMoves) {
-						Piece[] orderedPieces = currentState2.getOrderedPieces();
+						Piece[] orderedPieces = currentState2.pieces;
 
 						if (orderedPieces[0].value != orderedPieces[1].value) {
 							BoardState2 branch = currentState2.getNewBranch();

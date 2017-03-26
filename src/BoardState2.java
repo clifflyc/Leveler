@@ -7,14 +7,14 @@ public class BoardState2 implements Comparable<BoardState2> {
 	static HashMap<Short, Pair> idToCoord;
 
 	short moves;
-	public List<Piece> pieces = new ArrayList<Piece>();
+	public Piece[] pieces;
 	public List<Pair> links;
 
 	BoardState2 previousState;
 
 	public BoardState2() {
 		moves = 0;
-		pieces = new ArrayList<Piece>();
+		pieces = null;
 		links = new ArrayList<Pair>();
 	}
 
@@ -23,7 +23,7 @@ public class BoardState2 implements Comparable<BoardState2> {
 	public void setup(byte size, byte[][] grid) {
 		makePieces(size, grid);
 		assignNeighbours(size, grid);
-		
+
 	}
 
 	private void makePieces(byte size, byte[][] grid) {
@@ -41,17 +41,19 @@ public class BoardState2 implements Comparable<BoardState2> {
 				}
 			}
 		}
-		this.pieces = pieces;
+		this.pieces = new Piece[pieces.size()];
+		pieces.toArray(this.pieces);
+		Arrays.sort(this.pieces);
 	}
 
-	private void countPiece(byte row, byte column, byte pieceValue, boolean[][] counted, byte size, byte [][] grid) {
+	private void countPiece(byte row, byte column, byte pieceValue, boolean[][] counted, byte size, byte[][] grid) {
 		if (row >= 0 && column >= 0 && row < size && column < size) {
 			if (!counted[row][column] && grid[row][column] == pieceValue) {
 				counted[row][column] = true;
-				countPiece((byte)(row + 1), column, pieceValue, counted, size, grid);
-				countPiece((byte)(row - 1), column, pieceValue, counted, size, grid);
-				countPiece(row, (byte)(column + 1), pieceValue, counted, size, grid);
-				countPiece(row, (byte)(column - 1), pieceValue, counted, size, grid);
+				countPiece((byte) (row + 1), column, pieceValue, counted, size, grid);
+				countPiece((byte) (row - 1), column, pieceValue, counted, size, grid);
+				countPiece(row, (byte) (column + 1), pieceValue, counted, size, grid);
+				countPiece(row, (byte) (column - 1), pieceValue, counted, size, grid);
 			}
 		}
 	}
@@ -63,8 +65,8 @@ public class BoardState2 implements Comparable<BoardState2> {
 			List<Short> neighbourIDs = new ArrayList<Short>();
 			boolean[][] counted = new boolean[size][size];
 			Pair coord = idToCoord.get(piece.id);
-			byte row = (byte)coord.i1;
-			byte column = (byte)coord.i2;
+			byte row = (byte) coord.i1;
+			byte column = (byte) coord.i2;
 			traverseToNeighbours(row, column, grid[row][column], counted, size, grid, neighbourIDs);
 
 			for (short neighbourId : neighbourIDs) {
@@ -76,8 +78,8 @@ public class BoardState2 implements Comparable<BoardState2> {
 		}
 	}
 
-	private void traverseToNeighbours(byte row, byte column, byte pieceValue, boolean[][] counted, byte size, byte[][] grid,
-			List<Short> neighbourIDs) {
+	private void traverseToNeighbours(byte row, byte column, byte pieceValue, boolean[][] counted, byte size,
+			byte[][] grid, List<Short> neighbourIDs) {
 		if (row >= 0 && column >= 0 && row < size && column < size) {
 			if (!counted[row][column]) {
 				if (grid[row][column] == pieceValue) {
@@ -118,7 +120,7 @@ public class BoardState2 implements Comparable<BoardState2> {
 		}
 	}
 
-	public Pair getNextHighLow(Piece piece){
+	public Pair getNextHighLow(Piece piece) {
 
 		byte nextHighest = Byte.MAX_VALUE;
 		byte nextLowest = Byte.MIN_VALUE;
@@ -131,9 +133,9 @@ public class BoardState2 implements Comparable<BoardState2> {
 				nextLowest = neighbourValue;
 			}
 		}
-		return new Pair(nextHighest,nextLowest);
+		return new Pair(nextHighest, nextLowest);
 	}
-	
+
 	private List<Piece> getNeighbours(Piece piece) {
 		List<Piece> neighbours = new ArrayList<Piece>();
 
@@ -160,7 +162,7 @@ public class BoardState2 implements Comparable<BoardState2> {
 	}
 
 	public void changeGrid(short pieceId, int change) {
-		Piece piece=null;
+		Piece piece = null;
 		for (Piece p : pieces) {
 			if (p.id == pieceId) {
 				piece = p;
@@ -183,6 +185,7 @@ public class BoardState2 implements Comparable<BoardState2> {
 				mergePieces(piece, neighbour);
 			}
 		}
+		Arrays.sort(pieces);
 	}
 
 	public void mergePieces(Piece p1, Piece p2) {
@@ -205,12 +208,25 @@ public class BoardState2 implements Comparable<BoardState2> {
 			}
 			links.add(new Pair(p1.id, p2Neighbour.id));
 		}
-		pieces.remove(p2);
+		
+		removePiece(p2.id);
+	}
 
+	private void removePiece(short id) {
+		Piece[] newPieces = new Piece[pieces.length - 1];
+		int pos = 0;
+		
+		for (int i = 0; i < pieces.length; i++) {
+			if (pieces[i].id != id) {
+				newPieces[pos] = pieces[i];
+				pos++;
+			}
+		}
+		pieces = newPieces;
 	}
 
 	public int pieceCount() {
-		return pieces.size();
+		return pieces.length;
 	}
 
 	public BoardState2 getKindaDeepClone() {
@@ -218,13 +234,13 @@ public class BoardState2 implements Comparable<BoardState2> {
 		clone.moves = moves;
 		clone.previousState = previousState;
 
-		for (Piece piece : pieces) {
-			clone.pieces.add(piece.clone());
+		clone.pieces = new Piece[pieces.length];
+		for (int i = 0; i < pieces.length; i++) {
+			clone.pieces[i] = pieces[i].clone();
 		}
 		for (Pair link : links) {
 			clone.links.add(link.clone());
 		}
-
 		return clone;
 	}
 
@@ -234,21 +250,13 @@ public class BoardState2 implements Comparable<BoardState2> {
 		return clone;
 	}
 
-	public Piece[] getOrderedPieces(){
-		Piece[] pieces = new Piece[this.pieces.size()];
-		this.pieces.toArray(pieces);
-		Arrays.sort(pieces);
-		return pieces;
+	public int getLeastPossibleMovesLeft() {
+		return (pieces[pieces.length - 1].value - pieces[0].value);
 	}
-	
-	public int getLeastPossibleMovesLeft(){ 
-		Piece[] pieces = getOrderedPieces();
-		return(pieces[pieces.length-1].value-pieces[0].value);
-	}
-	
+
 	@Override
 	public int compareTo(BoardState2 other) {
-		if (pieces.size() > other.pieces.size()) {
+		if (pieces.length > other.pieces.length) {
 			return 1;
 		}
 		{
