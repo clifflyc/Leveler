@@ -16,11 +16,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 //TODO
-//playback
-//reUI
 //help commands
 //no concurrent solves
-//bigger sizes edges
 
 public class Main extends Application {
 	static final int SCREEN_WIDTH = 800;
@@ -46,6 +43,8 @@ public class Main extends Application {
 	int boxSize = 200;
 	static int speed = 350;
 
+	boolean isSolving = false;
+	boolean isPlayingBack = false;
 	boolean checking = false;
 	boolean edit = false;
 
@@ -60,7 +59,7 @@ public class Main extends Application {
 		logText = "";
 		this.stage = stage;
 		stage.setTitle("Leveler!");
-		
+
 		setup();
 		stage.show();
 	}
@@ -97,7 +96,7 @@ public class Main extends Application {
 		logPane.setLayoutY(COMMAND_LINE_HEIGHT);
 		logPane.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 		logPane.setHbarPolicy(ScrollBarPolicy.NEVER);
-		
+
 		textField = new TextField();
 		textField.setPrefSize(SCREEN_WIDTH / 2, COMMAND_LINE_HEIGHT);
 		textField.setLayoutX(SCREEN_WIDTH);
@@ -164,6 +163,7 @@ public class Main extends Application {
 
 	}
 
+	// TODO HOW TO DO THIS giant switch case?
 	void command(String command) {
 		String[] t = command.split(" ");
 		String[] split = new String[t.length + 1];
@@ -172,118 +172,140 @@ public class Main extends Application {
 		}
 		split[split.length - 1] = "";
 
-		switch (split[0]) {
-		case "new":
-			switch (split[1]) {
-			case "game":
-				initNewGame();
-				addLog("Started new game.");
-				break;
-			default:
-				addLog("New what?");
-				break;
+		if (isSolving|| isPlayingBack) {
+			if(split[0].equals("stop")){
+				stopAll();
+			}else{
+				pleaseWaitMessage();
 			}
-			break;
-
-		case "reset":
-			restoreOriginalBoard();
-			addLog("Reset back to original board.");
-			break;
-
-		case "size":
-			try {
-				size = Integer.parseInt(split[1]);
-				setup();
-				addLog("Set board size to " + size + "!");
-			} catch (NumberFormatException e) {
-				addLog("I don't understand what is '" + split[1] + "'.\nIs it a number?");
-			}
-
-			break;
-
-		case "speed":
-			try {
-				speed = Integer.parseInt(split[1]);
-				addLog("Set animation speed to " + speed + "!");
-			} catch (NumberFormatException e) {
-				addLog("I don't understand what is '" + split[1] + "'.\nIs it a number?");
-			}
-
-			break;
-		case "check":
-			switch (split[1]) {
+		}else{
+			switch (split[0]) {
 			case "stop":
-				checking = false;
+				stopAll();
 				break;
-			case "":
-				check();
+			case "new":
+				switch (split[1]) {
+				case "game":
+					initNewGame();
+					addLog("Started new game.");
+					break;
+				default:
+					addLog("New what?");
+					break;
+				}
 				break;
-			default:
-				addLog("Check what?");
-				break;
-			}
-			break;
-		case "smart":
-			switch (split[1]) {
-			case "":
-				setStatus("< =_= > working...!");
-				algorithm();
-				break;
-			case "playback":
-				playbackSmart();
-				break;
-			case "stop":
-				Algorithm.stop();
-				break;
-			default:
-				addLog("Smart what?");
-				break;
-			}
-			break;
-		case "smart2":
-			switch (split[1]) {
-			case "":
-				setStatus("< =_= > working...!");
-				algorithm2();
-				break;
-			case "playback":
-				playbackSmart2();
-				break;
-			case "stop":
-				Algorithm2.stop();
-				break;
-			default:
-				addLog("Smart2 what?");
-				break;
-			}
-			break;
-		case "edit":
-			switch (split[1]) {
-			case "":
-				edit = true;
-				break;
-			case "off":
-				edit = false;
-				break;
-			}
-			break;
 
-		case "undo":
-			printBoard(board.previousState);
-			setCurrentBoard(board.previousState);
-			break;
-		case "read":
-			importBoard();
-			break;
-		case "write":
-			exportBoard();
-			break;
-		default:
-			addLog("I don't know what you are saying.");
-			break;
+			case "reset":
+				restoreOriginalBoard();
+				addLog("Reset back to original board.");
+				break;
+
+			case "size":
+				try {
+					size = Integer.parseInt(split[1]);
+					setup();
+					addLog("Set board size to " + size + "!");
+				} catch (NumberFormatException e) {
+					addLog("I don't understand what is '" + split[1] + "'.\nIs it a number?");
+				}
+
+				break;
+
+			case "speed":
+				try {
+					speed = Integer.parseInt(split[1]);
+					addLog("Set animation speed to " + speed + "!");
+				} catch (NumberFormatException e) {
+					addLog("I don't understand what is '" + split[1] + "'.\nIs it a number?");
+				}
+
+				break;
+			case "check":
+				switch (split[1]) {
+				case "stop":
+					checking = false;
+					break;
+				case "":
+					check();
+					break;
+				default:
+					addLog("Check what?");
+					break;
+				}
+				break;
+			case "smart":
+				switch (split[1]) {
+				case "":
+					setStatus("< =_= > working...!");
+					algorithm();
+					break;
+				case "playback":
+					playbackSmart();
+					break;
+				case "stop":
+					Algorithm.stop();
+					break;
+				default:
+					addLog("Smart what?");
+					break;
+				}
+				break;
+			case "smart2":
+				switch (split[1]) {
+				case "":
+					setStatus("< =_= > working...!");
+					algorithm2();
+					break;
+				case "playback":
+					playbackSmart2();
+					break;
+				case "stop":
+					Algorithm2.stop();
+					break;
+				default:
+					addLog("Smart2 what?");
+					break;
+				}
+				break;
+			case "edit":
+				switch (split[1]) {
+				case "":
+					edit = true;
+					break;
+				case "off":
+					edit = false;
+					break;
+				}
+				break;
+
+			case "undo":
+				printBoard(board.previousState);
+				setCurrentBoard(board.previousState);
+				break;
+			case "read":
+				importBoard();
+				break;
+			case "write":
+				exportBoard();
+				break;
+			default:
+				addLog("I don't know what you are saying.");
+				break;
+			}
 		}
 	}
 
+	void stopAll(){
+		Algorithm.stop();
+		Algorithm2.stop();
+		Tracer.stop();
+		checking=false;
+	}
+	
+	void pleaseWaitMessage(){
+		addLog("Please wait until "+ (isSolving? "solving" : "playback") + "is finished.");
+		addLog("You can enter 'stop' to cancel the " +(isSolving? "solving" : "playback."));
+	}
 	void printBoard(Board Board) {
 		printBoard(Board, false);
 	}
@@ -433,7 +455,11 @@ public class Main extends Application {
 	}
 
 	void changeGrid(int row, int column, int change) {
-
+		if (isSolving|| isPlayingBack) {
+			pleaseWaitMessage();
+			return;
+		}
+		
 		if (edit) {
 			Board clone = board.getDeepClone();
 			clone.grid[row][column] += change;
@@ -443,6 +469,7 @@ public class Main extends Application {
 			Board branch = board.getNewBranch();
 			branch.changeGrid(row, column, change);
 			printBoard(branch);
+			setCurrentBoard(branch);
 		}
 	}
 
@@ -463,6 +490,7 @@ public class Main extends Application {
 	}
 
 	void algorithm() {
+		isSolving = true;
 		Algorithm algorithm = new Algorithm(oriBoard.grid);
 		algorithm.messageProperty().addListener((o, oldMessage, newMessage) -> handleMessageSmart(newMessage));
 		new Thread(algorithm).start();
@@ -473,6 +501,7 @@ public class Main extends Application {
 		String[] words = message.split(" ");
 
 		if (words[0].equals("Done!")) {
+			isSolving = false;
 			if (checking) {
 				if (Algorithm.solution.moves != Algorithm2.solution.moves) {
 					checking = false;
@@ -481,28 +510,34 @@ public class Main extends Application {
 					initNewGame();
 					algorithm2();
 				}
-
 			}
 		}
 
 	}
 
-	void playbackSmart2() {
-		// Board solvedBoard = Algorithm2.solution;
-		// Tracer tracer = new Tracer(solvedBoard);
-		// tracer.messageProperty().addListener((o, oldMessage, newMessage) ->
-		// printTracerGrid());
-		// new Thread(tracer).start();
-		// say("Playing smart2 solution...");
+	void playbackSmart() {
+		isPlayingBack = true;
+		Tracer tracer = new Tracer(oriBoard.getDeepClone(), Algorithm.solution);
+		tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
+		new Thread(tracer).start();
+		setStatus("Playing smart solution...");
 	}
 
-	void playbackSmart() {
-		// Board solvedBoard = Algorithm.solution;
-		// Tracer tracer = new Tracer(solvedBoard);
-		// tracer.messageProperty().addListener((o, oldMessage, newMessage) ->
-		// printTracerGrid());
-		// new Thread(tracer).start();
-		// say("Playing smart solution...");
+	void playbackSmart2() {
+		Tracer tracer = new Tracer(oriBoard.getDeepClone(), Algorithm2.solution);
+		tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
+		new Thread(tracer).start();
+		setStatus("Playing smart2 solution...");
+	}
+
+	void printTracerGrid() {
+		Board b = Tracer.playbackQueue.poll();
+		printBoard(b);
+		setCurrentBoard(b);
+		if (Tracer.playbackQueue.isEmpty()) {
+			setStatus("Done playing solution...");
+			isPlayingBack = false;
+		}
 	}
 
 	void check() {

@@ -8,7 +8,6 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 public class TileAnimation extends Transition{
-
 	Label label;
 	Color from;
 	Color to;
@@ -25,6 +24,5 @@ public class TileAnimation extends Transition{
 		Color curColor= from.interpolate(to, frac);
 		label.setBackground(new Background(new BackgroundFill(curColor, CornerRadii.EMPTY, Insets.EMPTY)));
 	}
-
-
+	
 }

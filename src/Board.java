@@ -1,5 +1,6 @@
-
 public class Board {
+	static int GENERATED_RANDOM_VALUE_MAX=5;
+	
 	int size;
 	int[][] grid;
 
@@ -10,7 +11,7 @@ public class Board {
 		Board newBoard = new Board(size);
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				newBoard.grid[i][j] = (int) (Math.random() * size + 1);
+				newBoard.grid[i][j] = (int) (Math.random() * GENERATED_RANDOM_VALUE_MAX + 1);
 			}
 		}
 		return newBoard;
@@ -21,8 +22,8 @@ public class Board {
 		grid = new int[size][size];
 	}
 
-	public void changeGrid(int[] coord, int change) {
-		changeGrid(coord[0], coord[1], change);
+	public void changeGrid(Pair coord, int change) {
+		changeGrid(coord.i1, coord.i2, change);
 	}
 
 	public void changeGrid(int row, int column, int change) {
@@ -42,6 +43,17 @@ public class Board {
 		}
 	}
 
+	void applyDiffState(BoardState currentState, BoardState nextState){
+		for (Piece curPiece : currentState.pieces) {
+			for (Piece nextPiece : nextState.pieces) {
+				if(curPiece.id==nextPiece.id && curPiece.value!=nextPiece.value){
+					changeGrid(BoardState.idToCoord.get(curPiece.id),curPiece.value-nextPiece.value);
+					return;
+				}
+			}	
+		}
+	}
+	
 	public Board getDeepClone() {
 		Board clone = new Board(size);
 		for (int i = 0; i < size; i++) {

@@ -3,13 +3,13 @@ import java.util.PriorityQueue;
 import javafx.concurrent.Task;
 
 public class Algorithm2 extends Task<Void> {
-	static BoardState2 solution;
+	static BoardState solution;
 	static boolean stop;
-	BoardState2 board;
+	BoardState board;
 
 	public Algorithm2(int[][] grid) {
 		byte size = (byte) grid.length;
-		this.board = new BoardState2();
+		this.board = new BoardState();
 		byte[][] byteGrid = new byte[size][size];
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
@@ -50,7 +50,7 @@ public class Algorithm2 extends Task<Void> {
 		}
 
 		if (stop) {
-			updateMessage("Stopped.");
+			updateMessage("Done! Solve canceled.");
 		} else {
 			updateMessage("Done! Found least moves is " + solution.moves + "!!!\n" + "(after " + ops + " ops)");
 		}
@@ -58,7 +58,7 @@ public class Algorithm2 extends Task<Void> {
 	}
 
 	int brute() {
-		PriorityQueue<BoardState2> queue = new PriorityQueue<BoardState2>();
+		PriorityQueue<BoardState> queue = new PriorityQueue<BoardState>();
 		int ops = 0;
 		int leastMoves = Integer.MAX_VALUE;
 		int current = 0;
@@ -70,7 +70,7 @@ public class Algorithm2 extends Task<Void> {
 			current++;
 			ops++;
 
-			BoardState2 currentState = queue.poll();
+			BoardState currentState = queue.poll();
 
 			updateMessage("< =_= > working...! (" + ops + " ops at part " + current + "/" + (current + queue.size())
 					+ ")\n Is least moves " + leastMoves + "??");
@@ -82,7 +82,7 @@ public class Algorithm2 extends Task<Void> {
 				}
 			} else if (currentState.moves + currentState.getLeastPossibleMovesLeft() < leastMoves) {
 
-				PriorityQueue<BoardState2> queue2 = new PriorityQueue<BoardState2>();
+				PriorityQueue<BoardState> queue2 = new PriorityQueue<BoardState>();
 				queue2.add(currentState);
 
 				while (!queue2.isEmpty()) {
@@ -96,7 +96,7 @@ public class Algorithm2 extends Task<Void> {
 								+ (current + queue.size()) + ")\n Is least moves " + leastMoves + "??");
 					}
 
-					BoardState2 currentState2 = queue2.poll();
+					BoardState currentState2 = queue2.poll();
 
 					if (currentState2.pieceCount() == 1) {// solved!
 						if (currentState2.moves < leastMoves) {
@@ -107,13 +107,13 @@ public class Algorithm2 extends Task<Void> {
 						Piece[] orderedPieces = currentState2.pieces;
 
 						if (orderedPieces[0].value != orderedPieces[1].value) {
-							BoardState2 branch = currentState2.getNewBranch();
+							BoardState branch = currentState2.getNewBranch();
 							branch.changeGrid(orderedPieces[0].id, 1);
 							queue2.add(branch);
 						} else if (orderedPieces[orderedPieces.length - 1].value != orderedPieces[orderedPieces.length
 								- 2].value) {
 
-							BoardState2 branch = currentState2.getNewBranch();
+							BoardState branch = currentState2.getNewBranch();
 							branch.changeGrid(orderedPieces[orderedPieces.length - 1].id, -1);
 							queue2.add(branch);
 						} else if (currentState2.moves + currentState2.getLeastPossibleMovesLeft() + 1 < leastMoves) {
@@ -132,16 +132,16 @@ public class Algorithm2 extends Task<Void> {
 	// 2132
 	// 3423
 	// 1342
-	void branchOff(BoardState2 currentState, PriorityQueue<BoardState2> queue) {
+	void branchOff(BoardState currentState, PriorityQueue<BoardState> queue) {
 		for (Piece piece : currentState.pieces) {
 			Pair nextHighLow = currentState.getNextHighLow(piece);
 			if (nextHighLow.i1 != Byte.MAX_VALUE) {
-				BoardState2 branch = currentState.getNewBranch();
+				BoardState branch = currentState.getNewBranch();
 				branch.changeGrid(piece.id, nextHighLow.i1 - piece.value);
 				queue.add(branch);
 			}
 			if (nextHighLow.i2 != Byte.MIN_VALUE) {
-				BoardState2 branch = currentState.getNewBranch();
+				BoardState branch = currentState.getNewBranch();
 				branch.changeGrid(piece.id, nextHighLow.i2 - piece.value);
 				queue.add(branch);
 			}
