@@ -54,6 +54,17 @@ public class Board {
 		}
 	}
 	
+	public boolean hasWon(){
+		int number = grid[0][0];
+		for(int i=0;i<size;i++){
+			for(int j=0;j<size;j++){
+				if(grid[i][j] != number){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	public Board getDeepClone() {
 		Board clone = new Board(size);
 		for (int i = 0; i < size; i++) {

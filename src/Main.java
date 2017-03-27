@@ -393,6 +393,9 @@ public class Main extends Application {
 			case "help": // log current number of moves
 				logHelp();
 				break;
+			case "info": // log current number of moves
+				logInfo();
+				break;
 
 			default:
 				addLog("I don't know what you are saying.");
@@ -557,6 +560,7 @@ public class Main extends Application {
 	}// end getColor method
 
 	/**
+	 * logHelp method:
 	 * Displays a list of commands and what each command does in the log.
 	 */
 	void logHelp() {
@@ -577,8 +581,19 @@ public class Main extends Application {
 		addLog("read - start a new games with values from a file");
 		addLog("write - saves the current grid values to a file");
 		addLog("moves - displays current number of moves");
+		addLog("info - displays some information about the game");
 	}// end logHelp method
 
+	
+	/**
+	 * logInfo method:
+	 * Displays some information about the game in general.
+	 */
+	void logInfo(){
+		addLog("");//TODO
+	}//end logInfo method
+	
+	
 	/**
 	 * setSize method: Sets the size of the grid to an integer passed as
 	 * parameter. If the size is not between 1 and 127, reject the number and
@@ -713,6 +728,9 @@ public class Main extends Application {
 	 * A branch of the current board is created and its reference replaces the
 	 * current board, the branch will hold reference to the current board if the
 	 * user wishes to undo.
+	 * <p>
+	 * Afterwards, calls {@code checkWin} method to tell the player if they have won yet.
+	 * 
 	 * 
 	 * @param coord
 	 *            the coordinate the change is to be applied to
@@ -737,8 +755,21 @@ public class Main extends Application {
 			printBoard(branch);
 			setCurrentBoard(branch);
 		}
+		
+		checkWin();
 	}// end changeGrid method
 
+	/**
+	 * checkWin method:
+	 * Checks if the current board satisfies win condition by calling the {@code hasWon} method of the board.
+	 * If the player has won, tell the player in the log.
+	 */
+	void checkWin(){
+		if(board.hasWon()){
+			addLog("Game won after "+board.moves+" moves!");
+		}
+	}//end checkWin metod
+	
 	void algorithm2() {// TODO die
 		Algorithm2 algorithm = new Algorithm2(oriBoard.grid);
 		algorithm.messageProperty().addListener((o, oldmessage, newMessage) -> handleMessageSmart2(newMessage));
