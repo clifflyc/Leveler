@@ -14,8 +14,6 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-//TODO about/info and win condition
-
 public class Main extends Application {
 	static final String BG_URL = "https://i.imgur.com/rGiw7aW.png"; //TODO praise KyoAni for bg image
 	static final int SCREEN_WIDTH = 800;
@@ -35,7 +33,6 @@ public class Main extends Application {
 
 	boolean isSolving = false;
 	boolean isPlayingBack = false;
-	boolean checking = false;
 	boolean edit = false;
 
 	/**
@@ -55,7 +52,7 @@ public class Main extends Application {
 	/**
 	 * start method: Called at the start of the application for initialization.
 	 * Sets the title of the window. Initializes all the UI and display
-	 * components and adds it to the window. Afterwards, shows the window,
+	 * components and adds it to the window. Shows the window,
 	 * instantiate the {@code logText} String, the {@code board} field, and all
 	 * boolean fields, and calls {@code initNewGame} to initiate a new game.
 	 * 
@@ -67,13 +64,13 @@ public class Main extends Application {
 	public void start(Stage stage) {
 		this.stage = stage;
 		stage.setTitle("Leveler!");
-		setup();
-		stage.show();
-
 		board = new Board(size);
 		logText = "";
-		isSolving = isPlayingBack = checking = edit = false;
+		isSolving = isPlayingBack = edit = false;
+		setup();
 		initNewGame();
+		status.setText("enter 'help' in the input text field below for a list of commands");
+		stage.show();
 	}// end start method
 
 	/**
@@ -194,7 +191,6 @@ public class Main extends Application {
 		root.getChildren().add(textField);
 	}// end setupTextField method
 
-	// TODO background image
 	/**
 	 * setupBackgroundImage method: Instantiates a, {@code ImageView} object and
 	 * adds it to the parent node passed as parameter. Loads the background
@@ -268,7 +264,6 @@ public class Main extends Application {
 		root.getChildren().add(grid);
 	} // end setupGrid method
 
-	// TODO HOW TO DO THIS giant switch case?
 	/**
 	 * command method: Does an action or calls a method to do an action based on
 	 * the String passed as parameter. Splits the String into an array, then
@@ -338,31 +333,12 @@ public class Main extends Application {
 				}
 				break;
 
-			case "check": // TODO delete
-				switch (split[1]) {
-				case "stop":
-					checking = false;
-					break;
-				case "":
-					check();
-					break;
-				default:
-					addLog("Check what?");
-					break;
-				}
-				break;
-
 			case "solve": // finds least moves
 				setStatus("< =_= > working...!");
 				algorithm();
 				break;
 			case "playback": // playback solution
 				playback();
-				break;
-
-			case "solve2": // TODO delete
-				setStatus("< =_= > working...!");
-				algorithm2();
 				break;
 
 			case "edit": // manually change individual squares on the grid
@@ -411,9 +387,7 @@ public class Main extends Application {
 	 */
 	void stopAll() {
 		Algorithm.stop();
-		Algorithm2.stop(); // TODO delete
 		Tracer.stop();
-		checking = false; // TODO delete
 	}// end stopAll method
 
 	/**
@@ -457,7 +431,7 @@ public class Main extends Application {
 		int[][] gameGrid = Board.grid;
 		for (int i = 0; i < gameGrid.length; i++) {
 			for (int j = 0; j < gameGrid[0].length; j++) {
-				setLabelText(labelsGrid[i][j], gameGrid[i][j]);
+				labelsGrid[i][j].setText(gameGrid[i][j]+"");
 				if (flash || board.grid[i][j] != Board.grid[i][j]) {
 					Color start = getColor(board.grid[i][j]);
 					Color end = getColor(Board.grid[i][j]);
@@ -470,50 +444,6 @@ public class Main extends Application {
 			}
 		}
 	}// end printBoard method
-
-	// TODO delete
-	void setLabelText(Label label, int number) {
-		String text = null;
-		switch (number) {
-		case 0:
-			text = "零";
-			break;
-		case 1:
-			text = "一";
-			break;
-		case 2:
-			text = "二";
-			break;
-		case 3:
-			text = "三";
-			break;
-		case 4:
-			text = "四";
-			break;
-		case 5:
-			text = "五";
-			break;
-		case 6:
-			text = "六";
-			break;
-		case 7:
-			text = "七";
-			break;
-		case 8:
-			text = "八";
-			break;
-		case 9:
-			text = "九";
-			break;
-		case 10:
-			text = "十";
-			break;
-		default:
-			text = number + "";
-			break;
-		}
-		label.setText(text);
-	}
 
 	/**
 	 * getColor method: Returns a color specific for a number. For numbers below
@@ -605,7 +535,9 @@ public class Main extends Application {
 	void setSize(int s) {
 		if (s > 0 && s <= Byte.MAX_VALUE) {
 			size = s;
+			board = new Board(size);
 			setup();
+			initNewGame();
 			addLog("Set board size to " + size + "!");
 		} else {
 			addLog("Make sure the number is between 1 and " + Byte.MAX_VALUE + "!");
@@ -770,23 +702,6 @@ public class Main extends Application {
 		}
 	}//end checkWin metod
 	
-	void algorithm2() {// TODO die
-		Algorithm2 algorithm = new Algorithm2(oriBoard.grid);
-		algorithm.messageProperty().addListener((o, oldmessage, newMessage) -> handleMessageSmart2(newMessage));
-		new Thread(algorithm).start();
-	}
-
-	// TODO die
-	void handleMessageSmart2(String message) {
-		setStatus(message);
-		String[] words = message.split(" ");
-		if (words[0].equals("Done!")) {
-			if (checking) {
-				algorithm();
-			}
-		}
-	}
-
 	/**
 	 * algorithm method: Sets {@code isSolving} to true. Starts a new Thread
 	 * containing a new instance of the Algorithm class, which is constructed
@@ -816,15 +731,6 @@ public class Main extends Application {
 
 		if (words[0].equals("Done!")) {
 			isSolving = false;
-			if (checking) { // TODO die
-				if (Algorithm.solution.moves != Algorithm2.solution.moves) {
-					checking = false;
-					setStatus("Solution mismatch! Your algorithm sucks!");
-				} else {
-					initNewGame();
-					algorithm2();
-				}
-			}
 		}
 
 	}// end handleMessage method
@@ -863,10 +769,4 @@ public class Main extends Application {
 			isPlayingBack = false;
 		}
 	}// end printTracerGrid
-
-	void check() {// TODO die
-		checking = true;
-		algorithm2();
-	}
-
 }
