@@ -14,12 +14,47 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+/*=================================================================
+Leveler
+Cliff Li
+Mar 27, 2017
+Java 8
+=================================================================
+Problem Definition 	–  Creates an interactive "Leveler" game, containing an algorithm that can solves for the least amount of moves
+Input – user types in commands, user interacts with the game using mouse, loads data from file
+Output – shows a visual representation of the game on screen with messages on the side, writes data to file
+Process – algorithm uses an optimized brute force method to search for the least amount of moves.
+
+/**
+ * Main class:
+ * Contains the main method which is run first.
+ * Inherits a JavaFX applications which is launched at the start of the program.
+ * <p>
+ * Identifiers:
+ * <li> String BG_URL - the URL to the background image
+ * <li> int WINDOW_HEIGHT - the height of the window in pixels
+ * <li> int COMMAND_LINE_HEIGHT - the height of the command line in pixels
+ * <li> int size - the current number of rows and columns in the board
+ * <li> int speed - the current time it takes for an animation in milliseconds
+ * <li> Stage stage - the instance of the stage created when this application launches
+ * <li> GridPane grid - a JavaFX GridPane node which contains the labels representing the grid values
+ * <li> Label[][] labelsGrid - a 2D array of labels, these reference the same labels contained by the GridPane
+ * <li> Label status - the label displaying the current status
+ * <li> Label log - the label displaying a log of messages
+ * <li> String logText - represents the String that is to be the text of the log label. 
+ * <li> Board board - an instance of Board that stores the current state of the board.
+ * <li> Board board - an instance of Board that stores the original state of the board at the start of the current game.
+ * <li> boolean isSolving - is the program currently running the algorithm to solve the board?
+ * <li> boolean isPlayingBack - is the program currently running an instance of Tracer to replay a solution to the game?
+ * <li> boolean edit - are we in edit mode?
+ */
 public class Main extends Application {
-	static final String BG_URL = "https://i.imgur.com/rGiw7aW.png"; //TODO praise KyoAni for bg image
-	static final int SCREEN_WIDTH = 800;
+	static final String BG_URL = "https://i.imgur.com/rGiw7aW.png";
+	// TODO praise KyoAni for bg image
+	static final int WINDOW_HEIGHT = 800;
 	static final int COMMAND_LINE_HEIGHT = 50;
-	static int size = 4;
-	static int speed = 350;
+	static int size;
+	static int speed;
 
 	Stage stage;
 	GridPane grid;
@@ -52,9 +87,10 @@ public class Main extends Application {
 	/**
 	 * start method: Called at the start of the application for initialization.
 	 * Sets the title of the window. Initializes all the UI and display
-	 * components and adds it to the window. Shows the window,
-	 * instantiate the {@code logText} String, the {@code board} field, and all
-	 * boolean fields, and calls {@code initNewGame} to initiate a new game.
+	 * components and adds it to the window. Shows the window, instantiates
+	 * {@code speed} and {@code size} integer fields, instantiate the
+	 * {@code logText} String, the {@code board} field, and all boolean fields,
+	 * and calls {@code initNewGame} to initiate a new game.
 	 * 
 	 * @param stage
 	 *            the primary instance of {@link javafx.stage.Stage} created
@@ -64,6 +100,8 @@ public class Main extends Application {
 	public void start(Stage stage) {
 		this.stage = stage;
 		stage.setTitle("Leveler!");
+		size = 4;
+		speed = 350;
 		board = new Board(size);
 		logText = "";
 		isSolving = isPlayingBack = edit = false;
@@ -91,9 +129,9 @@ public class Main extends Application {
 		setupStatusLabel(root);
 		setupLog(root);
 		setupTextField(root);
-		setupGrid(root, calculateBoxSize(SCREEN_WIDTH, size), size);
+		setupGrid(root, calculateBoxSize(WINDOW_HEIGHT, size), size);
 		setupBackgroundImage(root);
-		stage.setScene(new Scene(root, SCREEN_WIDTH * 1.5, SCREEN_WIDTH));
+		stage.setScene(new Scene(root, WINDOW_HEIGHT * 1.5, WINDOW_HEIGHT));
 	}// end setup method
 
 	/**
@@ -121,8 +159,8 @@ public class Main extends Application {
 	 */
 	void setupStatusLabel(Group root) {
 		status = new Label();
-		status.setPrefSize(SCREEN_WIDTH / 2, COMMAND_LINE_HEIGHT);
-		status.setLayoutX(SCREEN_WIDTH);
+		status.setPrefSize(WINDOW_HEIGHT / 2, COMMAND_LINE_HEIGHT);
+		status.setLayoutX(WINDOW_HEIGHT);
 		root.getChildren().add(status);
 	}// end setupStatusLabel method
 
@@ -149,8 +187,8 @@ public class Main extends Application {
 		log.setText(logText);
 
 		logPane.setContent(log);
-		logPane.setPrefSize(SCREEN_WIDTH / 2, SCREEN_WIDTH - 2 * COMMAND_LINE_HEIGHT);
-		logPane.setLayoutX(SCREEN_WIDTH);
+		logPane.setPrefSize(WINDOW_HEIGHT / 2, WINDOW_HEIGHT - 2 * COMMAND_LINE_HEIGHT);
+		logPane.setLayoutX(WINDOW_HEIGHT);
 		logPane.setLayoutY(COMMAND_LINE_HEIGHT);
 		logPane.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 		logPane.setHbarPolicy(ScrollBarPolicy.NEVER);
@@ -176,9 +214,9 @@ public class Main extends Application {
 	 */
 	void setupTextField(Group root) {
 		TextField textField = new TextField();
-		textField.setPrefSize(SCREEN_WIDTH / 2, COMMAND_LINE_HEIGHT);
-		textField.setLayoutX(SCREEN_WIDTH);
-		textField.setLayoutY(SCREEN_WIDTH - COMMAND_LINE_HEIGHT);
+		textField.setPrefSize(WINDOW_HEIGHT / 2, COMMAND_LINE_HEIGHT);
+		textField.setLayoutX(WINDOW_HEIGHT);
+		textField.setLayoutY(WINDOW_HEIGHT - COMMAND_LINE_HEIGHT);
 		textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
@@ -395,7 +433,7 @@ public class Main extends Application {
 	 * solving or playing-back of solution to end.
 	 */
 	void pleaseWaitMessage() {
-		addLog("Please wait until " + (isSolving ? "solving" : "playback") + "is finished.");
+		addLog("Please wait until " + (isSolving ? "solving" : "playback") + " is finished.");
 		addLog("You can enter 'stop' to cancel the " + (isSolving ? "solving" : "playback."));
 	}// end pleaseWaitMessage method
 
@@ -431,7 +469,7 @@ public class Main extends Application {
 		int[][] gameGrid = Board.grid;
 		for (int i = 0; i < gameGrid.length; i++) {
 			for (int j = 0; j < gameGrid[0].length; j++) {
-				labelsGrid[i][j].setText(gameGrid[i][j]+"");
+				labelsGrid[i][j].setText(gameGrid[i][j] + "");
 				if (flash || board.grid[i][j] != Board.grid[i][j]) {
 					Color start = getColor(board.grid[i][j]);
 					Color end = getColor(Board.grid[i][j]);
@@ -490,8 +528,8 @@ public class Main extends Application {
 	}// end getColor method
 
 	/**
-	 * logHelp method:
-	 * Displays a list of commands and what each command does in the log.
+	 * logHelp method: Displays a list of commands and what each command does in
+	 * the log.
 	 */
 	void logHelp() {
 		addLog("List of commands:");
@@ -514,16 +552,13 @@ public class Main extends Application {
 		addLog("info - displays some information about the game");
 	}// end logHelp method
 
-	
 	/**
-	 * logInfo method:
-	 * Displays some information about the game in general.
+	 * logInfo method: Displays some information about the game in general.
 	 */
-	void logInfo(){
-		addLog("");//TODO
-	}//end logInfo method
-	
-	
+	void logInfo() {
+		addLog("");// TODO
+	}// end logInfo method
+
 	/**
 	 * setSize method: Sets the size of the grid to an integer passed as
 	 * parameter. If the size is not between 1 and 127, reject the number and
@@ -661,7 +696,8 @@ public class Main extends Application {
 	 * current board, the branch will hold reference to the current board if the
 	 * user wishes to undo.
 	 * <p>
-	 * Afterwards, calls {@code checkWin} method to tell the player if they have won yet.
+	 * Afterwards, calls {@code checkWin} method to tell the player if they have
+	 * won yet.
 	 * 
 	 * 
 	 * @param coord
@@ -687,21 +723,21 @@ public class Main extends Application {
 			printBoard(branch);
 			setCurrentBoard(branch);
 		}
-		
+
 		checkWin();
 	}// end changeGrid method
 
 	/**
-	 * checkWin method:
-	 * Checks if the current board satisfies win condition by calling the {@code hasWon} method of the board.
-	 * If the player has won, tell the player in the log.
+	 * checkWin method: Checks if the current board satisfies win condition by
+	 * calling the {@code hasWon} method of the board. If the player has won,
+	 * tell the player in the log.
 	 */
-	void checkWin(){
-		if(board.hasWon()){
-			addLog("Game won after "+board.moves+" moves!");
+	void checkWin() {
+		if (board.hasWon()) {
+			addLog("Game won after " + board.moves + " moves!");
 		}
-	}//end checkWin metod
-	
+	}// end checkWin method
+
 	/**
 	 * algorithm method: Sets {@code isSolving} to true. Starts a new Thread
 	 * containing a new instance of the Algorithm class, which is constructed
@@ -769,4 +805,4 @@ public class Main extends Application {
 			isPlayingBack = false;
 		}
 	}// end printTracerGrid
-}
+}//end Main method
