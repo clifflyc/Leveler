@@ -25,7 +25,7 @@ public final class Pair {
 	public Pair(short i1, short i2) {
 		this.i1 = i1;
 		this.i2 = i2;
-	}
+	}// end Pair constructor
 
 	/**
 	 * clone method: Creates a clone of this instance by copying {@code i1} and
@@ -36,7 +36,7 @@ public final class Pair {
 	 */
 	public Pair clone() {
 		return new Pair(i1, i2);
-	}
+	}// end clone method
 
 	/**
 	 * equals method: check if this instance is considered equal to another
@@ -56,7 +56,7 @@ public final class Pair {
 			}
 		}
 		return false;
-	}
+	} // end equals method
 
 	/**
 	 * hashCode method: returns a hash code that will be the same number for
@@ -73,5 +73,5 @@ public final class Pair {
 		} else {
 			return (i2 + "" + i1).hashCode();
 		}
-	}
-}
+	}// end hashCode method
+}// end Pair class

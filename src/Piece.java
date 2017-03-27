@@ -25,7 +25,7 @@ public class Piece implements Comparable<Piece> {
 	public Piece(byte value, short id) {
 		this.value = value;
 		this.id = id;
-	}
+	}// end piece constructor
 
 	/**
 	 * clone method: Creates a clone of this instance by copying {@code value}
@@ -36,7 +36,7 @@ public class Piece implements Comparable<Piece> {
 	 */
 	public Piece clone() {
 		return new Piece(value, id);
-	}
+	}// end clone method
 
 	/**
 	 * compareTo method: Compares this Piece to another Piece by comparing the
@@ -51,6 +51,5 @@ public class Piece implements Comparable<Piece> {
 	@Override
 	public int compareTo(Piece other) {
 		return value - other.value;
-	}
-
-}
+	}// end compareTo method
+}// end Piece class

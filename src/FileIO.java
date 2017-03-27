@@ -1,12 +1,31 @@
-
 import java.io.*;
 
+/**
+ * This class contains two static methods that will read/write a 2D integer
+ * array to/from a file.
+ * <p>
+ * Identifiers:
+ * <li>static final String FILEPATH - the path of the file to read or write to.
+ */
 public class FileIO {
+	static final String FILEPATH = "D:\\temp.txt";
+
+	/**
+	 * read method: reads a grid of numbers from the file at the path specified
+	 * by {@code FILEPATH}. If any errors occur, an error message will be
+	 * printed to the console.
+	 * <p>
+	 * Local variables:
+	 * <li>String line - stores the current line being read
+	 * <li>int[][] grid - the array that the read numbers will be store to
+	 * <li>FileReader fileReader - the fileReader used to read the file
+	 * <li>BufferedReader bufferedReader - the BufferedReader used to wrap
+	 * around the FileReader
+	 * 
+	 * @return an 2D integer array containing the numbers read, or {@code null}
+	 *         if the reading operation has failed
+	 */
 	public static int[][] read() {
-
-		// The name of the file to open.
-		String fileName = "G:\\temp.txt";
-
 		// This will reference one line at a time
 		String line = null;
 
@@ -14,7 +33,7 @@ public class FileIO {
 
 		try {
 			// FileReader reads text files in the default encoding.
-			FileReader fileReader = new FileReader(fileName);
+			FileReader fileReader = new FileReader(FILEPATH);
 
 			// Always wrap FileReader in BufferedReader.
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -38,25 +57,37 @@ public class FileIO {
 			// Always close files.
 			bufferedReader.close();
 		} catch (FileNotFoundException ex) {
-			System.out.println("Unable to open file '" + fileName + "'");
-		} catch (NumberFormatException e){
-			System.out.println("Error converting character to number in file '" + fileName + "'");	
+			System.out.println("Unable to open file '" + FILEPATH + "'");
+		} catch (NumberFormatException e) {
+			System.out.println("Error converting character to number in file '" + FILEPATH + "'");
 		} catch (Exception ex) {
-			System.out.println("Error reading file '" + fileName + "'");
+			System.out.println("Error reading file '" + FILEPATH + "'");
 			// Or we could just do this:
 			// ex.printStackTrace();
 		}
 		return grid;
-	}
+	}// end read class
 
+	/**
+	 * Writes the numbers of a 2D integer array to a file at the path specified
+	 * by {@code FILEPATH}. If any unexpected error occurs, a message will be
+	 * printed to the console.
+	 * <p>
+	 * Local variable
+	 * <li>int size - the number of rows and columns in the array.
+	 * <li>FileWriter fileWriter - the fileWriter used to write to the file
+	 * <li>BufferedWriter bufferedWriter - the BufferedWriter used to wrap
+	 * around the FileWriter
+	 * 
+	 * @param grid
+	 *            the 2D integer array to write to the file
+	 */
 	public static void write(int[][] grid) {
 		int size = grid.length;
-		// The path and name of the file to write to.
-		String fileName = "G:\\temp.txt";
 
 		try {
 			// Assume default encoding.
-			FileWriter fileWriter = new FileWriter(fileName);
+			FileWriter fileWriter = new FileWriter(FILEPATH);
 
 			// Always wrap FileWriter in BufferedWriter.
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
@@ -72,9 +103,9 @@ public class FileIO {
 
 			// Always close files.
 			bufferedWriter.close();
-		} catch (IOException ex) {
-			System.out.println("Error writing to file '" + fileName + "'");
+		} catch (Exception ex) {
+			System.out.println("Error writing to file '" + FILEPATH + "'");
 
 		}
-	}
-}
+	}// end write class
+}// end FileIO class
