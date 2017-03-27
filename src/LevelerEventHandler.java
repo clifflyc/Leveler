@@ -3,7 +3,7 @@ import javafx.scene.input.MouseEvent;
 
 public class LevelerEventHandler implements EventHandler<MouseEvent> {
 
-	int row, column;
+	Pair coord;
 	@Override
 	public void handle(MouseEvent event) {
 		
