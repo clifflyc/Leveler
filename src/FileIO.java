@@ -8,7 +8,7 @@ import java.io.*;
  * <li>static final String FILEPATH - the path of the file to read or write to.
  */
 public class FileIO {
-	static final String FILEPATH = "G:\\temp.txt";
+	static final String FILEPATH = "D:\\TestFile1.txt";
 
 	/**
 	 * read method: reads a grid of numbers from the file at the path specified
@@ -22,18 +22,19 @@ public class FileIO {
 	 * <li>BufferedReader bufferedReader - the BufferedReader used to wrap
 	 * around the FileReader
 	 * 
+	 * @param filePath
+	 *            the path for the file, if blank, reads from default path
 	 * @return an 2D integer array containing the numbers read, or {@code null}
 	 *         if the reading operation has failed
 	 */
-	public static int[][] read() {
+	public static int[][] read(String filePath) {
 		// This will reference one line at a time
 		String line = null;
-
 		int[][] grid = null;
 
 		try {
 			// FileReader reads text files in the default encoding.
-			FileReader fileReader = new FileReader(FILEPATH);
+			FileReader fileReader = new FileReader(filePath.equals("") ? FILEPATH : filePath);
 
 			// Always wrap FileReader in BufferedReader.
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -79,15 +80,17 @@ public class FileIO {
 	 * <li>BufferedWriter bufferedWriter - the BufferedWriter used to wrap
 	 * around the FileWriter
 	 * 
+	 * @param filePath
+	 *            the path for the file, if blank, use default path
 	 * @param grid
 	 *            the 2D integer array to write to the file
 	 */
-	public static void write(int[][] grid) {
+	public static void write(int[][] grid, String filePath) {
 		int size = grid.length;
 
 		try {
 			// Assume default encoding.
-			FileWriter fileWriter = new FileWriter(FILEPATH);
+			FileWriter fileWriter = new FileWriter(filePath.equals("") ? FILEPATH : filePath);
 
 			// Always wrap FileWriter in BufferedWriter.
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);

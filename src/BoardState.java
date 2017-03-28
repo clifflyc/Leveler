@@ -268,11 +268,18 @@ public class BoardState implements Comparable<BoardState> {
 	/**
 	 * getNextHighLow method: Iterates through the values the neighboring pieces
 	 * to a piece, and returns the next highest and next lowest value in a Pair.
+	 * <p>
+	 * Local variables:
+	 * <li>byte nextHighest - holds the next highest neighboring value initially
+	 * Byte.MAX_VALUE
+	 * <li>byte nextLowest - holds the next lowest neighboring value, initially
+	 * Byte.MIN_VALUE
 	 * 
 	 * @param piece
 	 *            the piece to look around
-	 * @return a Pair where the first number is the next highest value and the
-	 *         second number is the next lowest value
+	 * @return a Pair where the first number is the next highest value
+	 *         (Byte.MAX_VALUE if no higher value found) and the second number
+	 *         is the next lowest value (Byte.MIN_VALUE if no lower value found)
 	 */
 	public Pair getNextHighLow(Piece piece) {
 		byte nextHighest = Byte.MAX_VALUE;
@@ -514,5 +521,5 @@ public class BoardState implements Comparable<BoardState> {
 	@Override
 	public int compareTo(BoardState other) {
 		return pieces.length - other.pieces.length;
-	}//end compareTo method
-}//end BoardState class
+	}// end compareTo method
+}// end BoardState class

@@ -1,135 +1,182 @@
 import java.util.PriorityQueue;
-
 import javafx.concurrent.Task;
 
+/**
+ * This class inherits from {@link javafx.concurrent.Task}. Given a grid, this
+ * will find the least amount of moves to solve the grid.
+ * <p>
+ * Identifiers:
+ * <li>static BoardState solution - represents final state of the solution with
+ * the least moves
+ * <li>static boolean stop - when true, this Thread will stop
+ * <li>BoardState board - represents the initial state of the board before
+ * solving
+ */
 public class Algorithm extends Task<Void> {
 	static BoardState solution;
 	static boolean stop;
 	BoardState board;
 
+	/**
+	 * constructor for Algorithm class: Converts the {@code grid} from integer
+	 * types to byte types, then instantiates {@code board} with the new byte
+	 * type array .
+	 * 
+	 * @param grid
+	 *            2D array of integers containing the values on the original
+	 *            board
+	 */
 	public Algorithm(int[][] grid) {
-		byte size = (byte) grid.length;
-		byte[][] byteGrid = new byte[size][size];
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
+		byte[][] byteGrid = new byte[grid.length][grid.length];
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid.length; j++) {
 				byteGrid[i][j] = (byte) grid[i][j];
 			}
 		}
 		this.board = new BoardState(byteGrid);
-	}
+	}// end Algorithm constructor
 
+	/**
+	 * stop method: Sets stop to true.
+	 */
 	public static void stop() {
 		stop = true;
-	}
+	}// end stop method
 
+	/**
+	 * call method: This method is called when the Task starts. Creates a
+	 * priority queue of type BoardState and add {@code board} to it. Poll the
+	 * queue and store into {@code currentState}. Check if {@code currentState}
+	 * only has 1 piece. If so, update {@value leastMoves} to match the moves it
+	 * takes to get to {@code currentState}. If {@code currentState} has
+	 * multiple pieces, call {@code hasSingleMaxMin} to check for single
+	 * maximums and minimums. If the call returns false, then call
+	 * {@code branchOff} to add all possible moves that can be taken from
+	 * {@code currentState} to the queue, each as a new BoardState. Do this for
+	 * as long as there is something in the queue.
+	 * <p>
+	 * Also, keeps tracks of the total number of states checked and the lowest
+	 * size of the queue. These numbers are sent as updated messages once every
+	 * 20000 states checked, and they give the user a sense of how long the
+	 * program has been working and how long it still needs to work.
+	 * <p>
+	 * Identifiers:
+	 * <li>int statesChecked - the total number of BoardStates processed through
+	 * the algorithm
+	 * <li>int leastMoves - the least number of moves so far
+	 * <li>lowestQueueSize - the lowest size the queue has been
+	 * <li>PriorityQueue queue - a priority queue of all the BoardStates that
+	 * need to be checked (BoardStates are ordered by number of pieces)
+	 */
 	@Override
 	protected Void call() throws Exception {
-		stop = false;
-		int ops = 0;
-		solution = board;
-
-		while (solution.pieces.length != 1) {
-			ops++;
-
-			Piece[] orderedPieces = solution.pieces;
-
-			if (orderedPieces[0].value != orderedPieces[1].value) {
-
-				solution = solution.getNewBranch();
-				solution.changeGrid(orderedPieces[0].id, 1);
-
-			} else if (orderedPieces[orderedPieces.length - 1].value != orderedPieces[orderedPieces.length - 2].value) {
-
-				solution = solution.getNewBranch();
-				solution.changeGrid(orderedPieces[orderedPieces.length - 1].id, -1);
-			} else {
-
-				ops += brute();
-			}
-		}
-
-		if (stop) {
-			updateMessage("Done! Solve canceled.");
-		} else {
-			updateMessage("Done! Found least moves is " + solution.moves + "!!!\n" + "(after " + ops + " ops)");
-		}
-		return null;
-	}
-
-	int brute() {
-		PriorityQueue<BoardState> queue = new PriorityQueue<BoardState>();
-		int ops = 0;
+		int statesChecked = 0;
 		int leastMoves = Integer.MAX_VALUE;
-		int current = 0;
+		int lowestQueueSize = Integer.MAX_VALUE;
+		PriorityQueue<BoardState> queue = new PriorityQueue<BoardState>();
 
-		branchOff(solution, queue);
+		stop = false;
+		queue.add(board);
 
-		a: while (!queue.isEmpty()) {
-			current++;
-			ops++;
+		while (!queue.isEmpty()) {
+			statesChecked++;
+
+			if (statesChecked % 20000 == 0) {
+				if (stop) {
+					break;
+				}
+				updateMessage("< =_= > working...! (" + statesChecked + " states checked; ETA in " + lowestQueueSize
+						+ ") \n Is least moves " + leastMoves + "??");
+			}
 
 			BoardState currentState = queue.poll();
-
-			updateMessage("< =_= > working...! (" + ops + " ops at part " + current + "/" + (current + queue.size())
-					+ ")\n Is least moves " + leastMoves + "??");
 
 			if (currentState.pieces.length == 1) {// solved!
 				if (currentState.moves < leastMoves) {
 					leastMoves = currentState.moves;
 					solution = currentState;
 				}
+				if (queue.size() < lowestQueueSize) {
+					lowestQueueSize = queue.size();
+				}
 			} else if (currentState.moves + currentState.getLeastPossibleMovesLeft() < leastMoves) {
-
-				PriorityQueue<BoardState> queue2 = new PriorityQueue<BoardState>();
-				queue2.add(currentState);
-
-				while (!queue2.isEmpty()) {
-					ops++;
-
-					if (ops % 10000 == 0) {
-						if (stop) {
-							break a;
-						}
-						updateMessage("< =_= > working...! (" + ops + " ops at part " + current + "/"
-								+ (current + queue.size()) + ")\n Is least moves " + leastMoves + "??");
+				if (!hasSingleMaxMin(currentState, queue)) {
+					// branch fully
+					if (currentState.moves + currentState.getLeastPossibleMovesLeft() + 1 < leastMoves) {
+						branchOff(currentState, queue);
 					}
-
-					BoardState currentState2 = queue2.poll();
-
-					if (currentState2.pieces.length == 1) {// solved!
-						if (currentState2.moves < leastMoves) {
-							leastMoves = currentState2.moves;
-							solution = currentState2;
-						}
-					} else if (currentState2.moves + currentState2.getLeastPossibleMovesLeft() < leastMoves) {
-						Piece[] orderedPieces = currentState2.pieces;
-
-						if (orderedPieces[0].value != orderedPieces[1].value) {
-							BoardState branch = currentState2.getNewBranch();
-							branch.changeGrid(orderedPieces[0].id, 1);
-							queue2.add(branch);
-						} else if (orderedPieces[orderedPieces.length - 1].value != orderedPieces[orderedPieces.length
-								- 2].value) {
-
-							BoardState branch = currentState2.getNewBranch();
-							branch.changeGrid(orderedPieces[orderedPieces.length - 1].id, -1);
-							queue2.add(branch);
-						} else if (currentState2.moves + currentState2.getLeastPossibleMovesLeft() + 1 < leastMoves) {
-
-							branchOff(currentState2, queue2);
-						}
-					}
+				}
+			} else {
+				if (queue.size() < lowestQueueSize) {
+					lowestQueueSize = queue.size();
 				}
 			}
 		}
 
-		return ops;
-	}
+		if (stop) {
+			updateMessage("Done! Solve canceled.");
+		} else {
+			updateMessage("Done! Found least moves is " + solution.moves + "!!!\n" + "(after " + statesChecked
+					+ " states checked)");
+		}
+		return null;
+	}// end call method
+
+	/**
+	 * hasSingleMaxMin method: Checks if the {@code currentState} has a single
+	 * piece that has the highest or lowest value. If it does, then create a
+	 * branch of {@code currentState} and in that branch, bring the
+	 * highest/lowest value towards the average by 1, and return true. If no
+	 * single highest/lowest has been found, then return false.
+	 * <p>
+	 * Local variables: Piece[] pieces - the {@code pieces} array of
+	 * {@code currentState}, which is ordered by each piece's value
+	 * 
+	 * @param currentState
+	 *            the current BoardState to be checked
+	 * @param queue
+	 *            the queue for instances of BoardState to be added to for later
+	 *            checking
+	 * @return {@code true} if a single highest/lowest value has been found
+	 */
+	boolean hasSingleMaxMin(BoardState currentState, PriorityQueue<BoardState> queue) {
+		Piece[] pieces = currentState.pieces;
+
+		// check for single max
+		if (pieces[0].value != pieces[1].value) {
+			BoardState branch = currentState.getNewBranch();
+			branch.changeGrid(pieces[0].id, 1);
+			queue.add(branch);
+			return true;
+			// check for single min
+		} else if (pieces[pieces.length - 1].value != pieces[pieces.length - 2].value) {
+			BoardState branch = currentState.getNewBranch();
+			branch.changeGrid(pieces[pieces.length - 1].id, -1);
+			queue.add(branch);
+			return true;
+		}
+		return false;
+	}// end hasSingleMaxMin method
 
 	// 4343
 	// 2132
 	// 3423
 	// 1342
+	/**
+	 * branchOff method: Iterate through the pieces in {@code currentState}.
+	 * Call {@code getNextHighLow} method in {@code currentState} for each piece
+	 * to get the next highest and next lowest neighboring value. Then, create a
+	 * new branch changing the piece to the highest, and a new branching
+	 * changing the piece to the lowest. Add all branches to the queue. If a
+	 * piece is already the highest/lowest out of all of its neighbors, don't
+	 * create a branch for that situation.
+	 * 
+	 * @param currentState
+	 *            the current BoardState to check
+	 * @param queue
+	 *            the queue for instances of BoardState to be added to for later
+	 *            checking
+	 */
 	void branchOff(BoardState currentState, PriorityQueue<BoardState> queue) {
 		for (Piece piece : currentState.pieces) {
 			Pair nextHighLow = currentState.getNextHighLow(piece);
@@ -144,7 +191,5 @@ public class Algorithm extends Task<Void> {
 				queue.add(branch);
 			}
 		}
-
-	}
-
-}
+	}// end branchOff method
+}// end Algorithm class

@@ -23,35 +23,41 @@ Java 8
 Problem Definition 	–  Creates an interactive "Leveler" game, containing an algorithm that can solves for the least amount of moves
 Input – user types in commands, user interacts with the game using mouse, loads data from file
 Output – shows a visual representation of the game on screen with messages on the side, writes data to file
-Process – algorithm uses an optimized brute force method to search for the least amount of moves.
+Process – uses a pruned brute force algorithm to determine the least amount of moves.
 */
 
 /**
- * Main class:
- * Contains the main method which is run first.
- * Inherits a JavaFX applications which is launched at the start of the program.
+ * Main class: Contains the main method which is run first. Inherits a JavaFX
+ * applications which is launched at the start of the program.
  * <p>
  * Identifiers:
- * <li> String BG_URL - the URL to the background image
- * <li> int WINDOW_HEIGHT - the height of the window in pixels
- * <li> int COMMAND_LINE_HEIGHT - the height of the command line in pixels
- * <li> int size - the current number of rows and columns in the board
- * <li> int speed - the current time it takes for an animation in milliseconds
- * <li> Stage stage - the instance of the stage created when this application launches
- * <li> GridPane grid - a JavaFX GridPane node which contains the labels representing the grid values
- * <li> Label[][] labelsGrid - a 2D array of labels, these reference the same labels contained by the GridPane
- * <li> Label status - the label displaying the current status
- * <li> Label log - the label displaying a log of messages
- * <li> String logText - represents the String that is to be the text of the log label. 
- * <li> Board board - an instance of Board that stores the current state of the board.
- * <li> Board board - an instance of Board that stores the original state of the board at the start of the current game.
- * <li> boolean isSolving - is the program currently running the algorithm to solve the board?
- * <li> boolean isPlayingBack - is the program currently running an instance of Tracer to replay a solution to the game?
- * <li> boolean edit - are we in edit mode?
+ * <li>String BG_URL - the URL to the background image
+ * <li>int WINDOW_HEIGHT - the height of the window in pixels
+ * <li>int COMMAND_LINE_HEIGHT - the height of the command line in pixels
+ * <li>int size - the current number of rows and columns in the board
+ * <li>int speed - the current time it takes for an animation in milliseconds
+ * <li>Stage stage - the instance of the stage created when this application
+ * launches
+ * <li>GridPane grid - a JavaFX GridPane node which contains the labels
+ * representing the grid values
+ * <li>Label[][] labelsGrid - a 2D array of labels, these reference the same
+ * labels contained by the GridPane
+ * <li>Label status - the label displaying the current status
+ * <li>Label log - the label displaying a log of messages
+ * <li>String logText - represents the String that is to be the text of the log
+ * label.
+ * <li>Board board - an instance of Board that stores the current state of the
+ * board.
+ * <li>Board board - an instance of Board that stores the original state of the
+ * board at the start of the current game.
+ * <li>boolean isSolving - is the program currently running the algorithm to
+ * solve the board?
+ * <li>boolean isPlayingBack - is the program currently running an instance of
+ * Tracer to replay a solution to the game?
+ * <li>boolean edit - are we in edit mode?
  */
 public class Main extends Application {
 	static final String BG_URL = "https://i.imgur.com/rGiw7aW.png";
-	// TODO praise KyoAni for bg image
 	static final int WINDOW_HEIGHT = 800;
 	static final int COMMAND_LINE_HEIGHT = 50;
 	static int size;
@@ -400,10 +406,10 @@ public class Main extends Application {
 				undo();
 				break;
 			case "read": // read from file
-				importBoard();
+				importBoard(split[1]);
 				break;
 			case "write": // write to file
-				exportBoard();
+				exportBoard(split[1]);
 				break;
 			case "moves": // log current number of moves
 				addLog("Current moves = " + board.moves);
@@ -551,9 +557,8 @@ public class Main extends Application {
 				+ "\nstop - stops the process of solving or playing-back a solution" + "\n"
 				+ "\nedit - this command allows you to manually change the values in the"
 				+ "\n		grid without counting it as a move (this will start a new game)"
-				+ "\nedit off - turns off editing"
-				+ "\nread - start a new games with values from a file"
-				+ "\nwrite - saves the current grid values to a file");
+				+ "\nedit off - turns off editing" + "\nread [filepath] - start a new games with values from a file"
+				+ "\nwrite [filepath] - saves the current grid values to a file");
 	}// end logHelp method
 
 	/**
@@ -645,9 +650,12 @@ public class Main extends Application {
 	 * calling {@code setSize}. After, create a new Board, set its grid to the
 	 * integer array and starts a new game using this new Board as
 	 * {@code oriBoard}.
+	 * 
+	 * @param filePath
+	 *            the path for the file, if blank, reads from default path
 	 */
-	void importBoard() {
-		int[][] grid = FileIO.read();
+	void importBoard(String filePath) {
+		int[][] grid = FileIO.read(filePath);
 		if (grid != null) {
 			setSize(grid.length);
 			oriBoard = new Board(grid.length);
@@ -665,9 +673,13 @@ public class Main extends Application {
 	 * calling {@code FileIO.write} and passing the integer array
 	 * {@code board.grid} (which hold the values of the current grid) as
 	 * parameter.
+	 * 
+	 * 
+	 * @param filePath
+	 *            the path for the file, if blank, writes to default path
 	 */
-	void exportBoard() {
-		FileIO.write(board.grid);
+	void exportBoard(String filePath) {
+		FileIO.write(board.grid, filePath);
 		addLog("Finished exporting to file!");
 	}// end exportBoard method
 
