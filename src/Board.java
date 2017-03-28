@@ -108,15 +108,18 @@ public class Board {
 	 *            what value should this square change to?
 	 */
 	void affectNeighbours(int row, int column, int from, int to) {
-		if (row >= 0 && column >= 0 && row < size && column < size) {
-			if (grid[row][column] == from) {
-				grid[row][column] = to;
+		if (grid[row][column] == from) {
+			grid[row][column] = to;
+			if (row < size-1)
 				affectNeighbours(row + 1, column, from, to);
+			if (row > 0)
 				affectNeighbours(row - 1, column, from, to);
+			if (column < size-1)
 				affectNeighbours(row, column + 1, from, to);
+			if (column > 0)
 				affectNeighbours(row, column - 1, from, to);
-			}
 		}
+
 	}// end affectNeighbours method
 
 	/**
@@ -166,7 +169,7 @@ public class Board {
 	 * of this instance copied over.
 	 * <p>
 	 * Local variables:
-	 * <li> Board clone - a deep clone of this instance
+	 * <li>Board clone - a deep clone of this instance
 	 * 
 	 * @return a completely separate but equal clone of this instance
 	 */
@@ -187,7 +190,7 @@ public class Board {
 	 * the {@code previousState} of the returned instance set to this instance.
 	 * <p>
 	 * Local variables:
-	 * <li> Board clone - a deep clone of this instance
+	 * <li>Board clone - a deep clone of this instance
 	 * 
 	 * @return a deep clone of this instance with {@code previousState}
 	 *         referencing to this instance.

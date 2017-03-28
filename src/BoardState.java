@@ -124,14 +124,16 @@ public class BoardState implements Comparable<BoardState> {
 	 *            the 2D array of integers representing the grid
 	 */
 	private void countPiece(byte row, byte column, byte pieceValue, boolean[][] counted, byte[][] grid) {
-		if (row >= 0 && column >= 0 && row < grid.length && column < grid.length) {
-			if (!counted[row][column] && grid[row][column] == pieceValue) {
-				counted[row][column] = true;
+		if (!counted[row][column] && grid[row][column] == pieceValue) {
+			counted[row][column] = true;
+			if (row < grid.length - 1)
 				countPiece((byte) (row + 1), column, pieceValue, counted, grid);
+			if (row > 0)
 				countPiece((byte) (row - 1), column, pieceValue, counted, grid);
+			if (column < grid.length - 1)
 				countPiece(row, (byte) (column + 1), pieceValue, counted, grid);
+			if (column > 0)
 				countPiece(row, (byte) (column - 1), pieceValue, counted, grid);
-			}
 		}
 	}// end countPiece
 
@@ -199,17 +201,19 @@ public class BoardState implements Comparable<BoardState> {
 	 */
 	private void traverseToNeighbors(byte row, byte column, byte pieceValue, boolean[][] counted, byte[][] grid,
 			List<Short> neighborIDs) {
-		if (row >= 0 && column >= 0 && row < grid.length && column < grid.length) {
-			if (!counted[row][column]) {
-				if (grid[row][column] == pieceValue) {
-					counted[row][column] = true;
+		if (!counted[row][column]) {
+			if (grid[row][column] == pieceValue) {
+				counted[row][column] = true;
+				if (row < grid.length - 1)
 					traverseToNeighbors((byte) (row + 1), column, pieceValue, counted, grid, neighborIDs);
+				if (row > 0)
 					traverseToNeighbors((byte) (row - 1), column, pieceValue, counted, grid, neighborIDs);
+				if (column < grid.length - 1)
 					traverseToNeighbors(row, (byte) (column + 1), pieceValue, counted, grid, neighborIDs);
+				if (column > 0)
 					traverseToNeighbors(row, (byte) (column - 1), pieceValue, counted, grid, neighborIDs);
-				} else {
-					traverseToPiece(row, column, grid[row][column], counted, grid, neighborIDs);
-				}
+			} else {
+				traverseToPiece(row, column, grid[row][column], counted, grid, neighborIDs);
 			}
 		}
 	}// end traverseToNeighbors method
@@ -244,24 +248,26 @@ public class BoardState implements Comparable<BoardState> {
 	 */
 	private void traverseToPiece(byte row, byte column, byte pieceValue, boolean[][] counted, byte[][] grid,
 			List<Short> neighborIDs) {
-		if (row >= 0 && column >= 0 && row < grid.length && column < grid.length) {
-			if (!counted[row][column] && grid[row][column] == pieceValue) {
-				counted[row][column] = true;
-				for (Piece piece : pieces) {
-					Pair coord = idToCoord.get(piece.id);
-					if (coord.i1 == row && coord.i2 == column) {
-						if (!neighborIDs.contains(piece.id)) {
-							neighborIDs.add(piece.id);
-						}
-						return;
+		if (!counted[row][column] && grid[row][column] == pieceValue) {
+			counted[row][column] = true;
+			for (Piece piece : pieces) {
+				Pair coord = idToCoord.get(piece.id);
+				if (coord.i1 == row && coord.i2 == column) {
+					if (!neighborIDs.contains(piece.id)) {
+						neighborIDs.add(piece.id);
 					}
+					return;
 				}
+			}
+			if (row < grid.length - 1)
 				traverseToPiece((byte) (row + 1), column, pieceValue, counted, grid, neighborIDs);
+			if (row > 0)
 				traverseToPiece((byte) (row - 1), column, pieceValue, counted, grid, neighborIDs);
+			if (column < grid.length - 1)
 				traverseToPiece(row, (byte) (column + 1), pieceValue, counted, grid, neighborIDs);
+			if (column > 0)
 				traverseToPiece(row, (byte) (column - 1), pieceValue, counted, grid, neighborIDs);
 
-			}
 		}
 	}// end traverseToPiece method
 
