@@ -9,14 +9,13 @@ public class Algorithm extends Task<Void> {
 
 	public Algorithm(int[][] grid) {
 		byte size = (byte) grid.length;
-		this.board = new BoardState();
 		byte[][] byteGrid = new byte[size][size];
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 				byteGrid[i][j] = (byte) grid[i][j];
 			}
 		}
-		this.board.setup((byte) size, byteGrid);
+		this.board = new BoardState(byteGrid);
 	}
 
 	public static void stop() {
@@ -29,7 +28,7 @@ public class Algorithm extends Task<Void> {
 		int ops = 0;
 		solution = board;
 
-		while (solution.pieceCount() != 1) {
+		while (solution.pieces.length != 1) {
 			ops++;
 
 			Piece[] orderedPieces = solution.pieces;
@@ -74,7 +73,7 @@ public class Algorithm extends Task<Void> {
 			updateMessage("< =_= > working...! (" + ops + " ops at part " + current + "/" + (current + queue.size())
 					+ ")\n Is least moves " + leastMoves + "??");
 
-			if (currentState.pieceCount() == 1) {// solved!
+			if (currentState.pieces.length == 1) {// solved!
 				if (currentState.moves < leastMoves) {
 					leastMoves = currentState.moves;
 					solution = currentState;
@@ -97,7 +96,7 @@ public class Algorithm extends Task<Void> {
 
 					BoardState currentState2 = queue2.poll();
 
-					if (currentState2.pieceCount() == 1) {// solved!
+					if (currentState2.pieces.length == 1) {// solved!
 						if (currentState2.moves < leastMoves) {
 							leastMoves = currentState2.moves;
 							solution = currentState2;

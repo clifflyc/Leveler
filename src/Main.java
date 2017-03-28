@@ -24,6 +24,7 @@ Problem Definition 	–  Creates an interactive "Leveler" game, containing an al
 Input – user types in commands, user interacts with the game using mouse, loads data from file
 Output – shows a visual representation of the game on screen with messages on the side, writes data to file
 Process – algorithm uses an optimized brute force method to search for the least amount of moves.
+*/
 
 /**
  * Main class:
@@ -391,7 +392,10 @@ public class Main extends Application {
 					break;
 				}
 				break;
-
+			case "clear": // clear log
+				logText = "";
+				addLog("log cleared");
+				break;
 			case "undo": // undo one step
 				undo();
 				break;
@@ -532,31 +536,35 @@ public class Main extends Application {
 	 * the log.
 	 */
 	void logHelp() {
-		addLog("List of commands:");
-		addLog("stop - stops the process of solving or playing-back a solution");
-		addLog("new game - starts a new game, with a new grid of numbers");
-		addLog("reset - restore the grid of numbers back to the state at the" + "\nstart of the current game.");
-		addLog("size [integer] - sets the size of the game grid to a number representing"
-				+ "\nnumber of squares in a row(will start a new game when used) ");
-		addLog("speed [integer] - sets the speed of animations and the solution playback"
-				+ "\nspeed to a number in ms");
-		addLog("solve - finds the least amount of moves possible for the current game");
-		addLog("playback - plays back the solution after using the solve command");
-		addLog("edit - this command allows you to manually change the values in the"
-				+ "\ngrid without counting it as a move");
-		addLog("edit off - turns off editing");
-		addLog("undo - undoes the most recent move");
-		addLog("read - start a new games with values from a file");
-		addLog("write - saves the current grid values to a file");
-		addLog("moves - displays current number of moves");
-		addLog("info - displays some information about the game");
+		addLog("\nList of commands:" + "\ninfo - displays some information about the game"
+				+ "\nmoves - displays current number of moves"
+				+ "\nnew game - starts a new game, with a new grid of numbers"
+				+ "\nreset - restore the grid of numbers back to the state at the"
+				+ "\n		start of the current game."
+				+ "\nsize [integer] - sets the size of the game grid to a number representing"
+				+ "\n		number of squares in a row(will start a new game when used) "
+				+ "\nspeed [integer] - sets the speed of animations and the solution playback"
+				+ "\n		speed to a number in ms" + "\nundo - undoes the most recent move"
+				+ "\nclear - clear this console" + "\n"
+				+ "\nsolve - finds the least amount of moves possible for the current game"
+				+ "\nplayback - plays back the solution after using the solve command"
+				+ "\nstop - stops the process of solving or playing-back a solution" + "\n"
+				+ "\nedit - this command allows you to manually change the values in the"
+				+ "\n		grid without counting it as a move (this will start a new game)"
+				+ "\nedit off - turns off editing"
+				+ "\nread - start a new games with values from a file"
+				+ "\nwrite - saves the current grid values to a file");
 	}// end logHelp method
 
 	/**
-	 * logInfo method: Displays some information about the game in general.
+	 * logInfo method: Displays to the log an description of the game.
 	 */
 	void logInfo() {
-		addLog("");// TODO
+		addLog("\nThis is a game called leveler." + "\nTo the left are tiles on a n by n grid."
+				+ "\nYou can left click a tile to increment it." + "\nYou can right click a tile to decrement it."
+				+ "\nWhen a tile changes, all tiles touching it" + "\n  with the same value changes as well"
+				+ "\nThe goal is to make all of the tiles the same"
+				+ "\n  value in the least amount of moves possible.\n");
 	}// end logInfo method
 
 	/**
@@ -645,6 +653,7 @@ public class Main extends Application {
 			oriBoard = new Board(grid.length);
 			oriBoard.grid = grid;
 			restoreOriginalBoard();
+			Algorithm.solution = null;
 			addLog("Successfully read from file!");
 		} else {
 			addLog("Error reading from file!");
@@ -716,7 +725,9 @@ public class Main extends Application {
 			Board clone = board.getDeepClone();
 			clone.grid[coord.i1][coord.i2] += change;
 			oriBoard = clone;
+			oriBoard.moves = 0;
 			restoreOriginalBoard();
+			Algorithm.solution = null;
 		} else {
 			Board branch = board.getNewBranch();
 			branch.changeGrid(coord, change);
@@ -784,7 +795,7 @@ public class Main extends Application {
 			Tracer tracer = new Tracer(oriBoard.getDeepClone(), Algorithm.solution);
 			tracer.messageProperty().addListener((o, oldMessage, newMessage) -> printTracerGrid());
 			new Thread(tracer).start();
-			setStatus("Playing smart solution...");
+			setStatus("Playing solution...");
 		} else {
 			addLog("No solutions to play for the current game (did you use 'solve' already?)");
 		}
@@ -805,4 +816,4 @@ public class Main extends Application {
 			isPlayingBack = false;
 		}
 	}// end printTracerGrid
-}//end Main method
+}// end Main method

@@ -164,6 +164,9 @@ public class Board {
 	 * getDeepClone method: Returns a deep clone of this instance. The deep
 	 * clone will be a separate instance of the Board class with all variables
 	 * of this instance copied over.
+	 * <p>
+	 * Local variables:
+	 * <li> Board clone - a deep clone of this instance
 	 * 
 	 * @return a completely separate but equal clone of this instance
 	 */
@@ -182,6 +185,9 @@ public class Board {
 	/**
 	 * getNewBranch method: Returns a deep clone of this instance, except with
 	 * the {@code previousState} of the returned instance set to this instance.
+	 * <p>
+	 * Local variables:
+	 * <li> Board clone - a deep clone of this instance
 	 * 
 	 * @return a deep clone of this instance with {@code previousState}
 	 *         referencing to this instance.
