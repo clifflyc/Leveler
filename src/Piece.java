@@ -1,4 +1,3 @@
-
 /**
  * A class that represents a single piece in the puzzle. Instances of this class
  * can have an id (assigned externally) and a value. Instances can be compared

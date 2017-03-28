@@ -8,7 +8,7 @@ import java.io.*;
  * <li>static final String FILEPATH - the path of the file to read or write to.
  */
 public class FileIO {
-	static final String FILEPATH = "D:\\TestFile1.txt";
+	static final String FILEPATH = "D:\\TestFile1.txt"; //default file path
 
 	/**
 	 * read method: reads a grid of numbers from the file at the path specified

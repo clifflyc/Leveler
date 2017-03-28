@@ -5,6 +5,37 @@ import javafx.concurrent.Task;
  * This class inherits from {@link javafx.concurrent.Task}. Given a grid, this
  * will find the least amount of moves to solve the grid.
  * <p>
+ * <b>Algorithm description:</b> The algorithm used (briefly):
+ * <li>checks every single possible way to solve the board
+ * <li>starts with the original board, imagine this as a node at the root of a
+ * tree
+ * <li>for every possible move that can be done on the original board, branch
+ * off from the root node into a new node where that move has been done
+ * <li>then, for every new node created, branch off again into all of the
+ * possible moves that can be taken
+ * <li>this creates a tree of all possible moves, where each node has a
+ * reference back to the previous node that it branched off of
+ * <li>when the least amount of moves is found, only the final node is stored,
+ * this node can be traced back through its references to the previous node, all
+ * the way back to the root node
+ * <li>one instance of the class BoardState represents one node
+ * <p>
+ * <b>Optimizations:</b>
+ * <li>for every node, if there is only one piece on the board that has the
+ * highest value on the board (i.e. not two or more pieces having the highest
+ * value), that piece can be decreased immediately. There is no need to branch
+ * out into all of the possible moves for this node.
+ * <li>similarly, if there is only one piece on the board that has the lowest
+ * value, that piece can be increased immediately without needing to check any
+ * other possible moves.
+ * <li>a "possible move" is a move that will join one piece to its next highest
+ * neighbor(s) or its next lowest neighbor(s)
+ * <li>in a node, the difference between the highest value and the lowest value
+ * is the absolute least amount of moves that it can possibly take to complete
+ * the game, if the current amount of moves in that node plus that difference
+ * exceeds the current record for least amount of moves, then the node can be
+ * removed since it cannot finish in less moves than the record
+ * <p>
  * Identifiers:
  * <li>static BoardState solution - represents final state of the solution with
  * the least moves
@@ -158,10 +189,6 @@ public class Algorithm extends Task<Void> {
 		return false;
 	}// end hasSingleMaxMin method
 
-	// 4343
-	// 2132
-	// 3423
-	// 1342
 	/**
 	 * branchOff method: Iterate through the pieces in {@code currentState}.
 	 * Call {@code getNextHighLow} method in {@code currentState} for each piece

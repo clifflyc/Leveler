@@ -84,7 +84,7 @@ public class Tracer extends Task<Void> {
 			return;
 		}
 
-		// apply diff to board and add it to queue
+		// apply differences to board and add it to queue
 		if (b.moves == 0) {
 			playbackQueue.add(board.getDeepClone());
 		} else {
